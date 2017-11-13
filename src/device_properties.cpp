@@ -528,7 +528,6 @@ void device_properties(int material){
     hole->~carrier();
     delete electron;
     delete hole;
-    diode.~device();
     fclose(out);
 	postprocess(V, simulationtime, bias_count);
 }
