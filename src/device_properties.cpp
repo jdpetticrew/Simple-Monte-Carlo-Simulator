@@ -522,6 +522,7 @@ void device_properties(int material){
 	delete [] I;
 	delete [] Inum;
 	fclose(counter);
+	fclose(Mout);
 	}
 	electron->~carrier();
     hole->~carrier();
