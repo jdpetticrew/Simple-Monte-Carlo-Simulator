@@ -25,7 +25,7 @@ int main(){
 	
 	//requests model from user
 	int calc;
-	printf("Calculate: 1) Diode Properties, 2) Drift Velocity, 3) Impact Ionization Coefficients\n");
+	printf("Mode: 1) Diode Properties, 2) Drift Velocity, 3) Impact Ionization Coefficients\n");
 	scanf("%d", &calc);
 	
 	//runs user specified model
