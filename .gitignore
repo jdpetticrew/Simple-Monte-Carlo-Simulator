@@ -7,3 +7,5 @@
 
 *.gitignore
 *.docx
+
+/src/*.txt
