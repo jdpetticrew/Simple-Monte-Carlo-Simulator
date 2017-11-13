@@ -1,0 +1,55 @@
+# Project: CombinedSMC
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = main.o drift_velocity.o device_properties.o ii_coef.o SMC_class.o tools_class.o functions.o device_class.o dev_prop_func.o carrier_class.o
+LINKOBJ  = main.o drift_velocity.o device_properties.o ii_coef.o SMC_class.o tools_class.o functions.o device_class.o dev_prop_func.o carrier_class.o
+LIBS     = -L"C:/TDM-GCC-64/lib" -L"C:/TDM-GCC-64/x86_64-w64-mingw32/lib" -static-libgcc
+INCS     = -I"C:/TDM-GCC-64/include" -I"C:/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/5.1.0/include"
+CXXINCS  = -I"C:/TDM-GCC-64/include" -I"C:/TDM-GCC-64/x86_64-w64-mingw32/include" -I"C:/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/5.1.0/include" -I"C:/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/5.1.0/include/c++"
+BIN      = CombinedSMC.exe
+CXXFLAGS = $(CXXINCS) 
+CFLAGS   = $(INCS) 
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+drift_velocity.o: drift_velocity.cpp
+	$(CPP) -c drift_velocity.cpp -o drift_velocity.o $(CXXFLAGS)
+
+device_properties.o: device_properties.cpp
+	$(CPP) -c device_properties.cpp -o device_properties.o $(CXXFLAGS)
+
+ii_coef.o: ii_coef.cpp
+	$(CPP) -c ii_coef.cpp -o ii_coef.o $(CXXFLAGS)
+
+SMC_class.o: SMC_class.cpp
+	$(CPP) -c SMC_class.cpp -o SMC_class.o $(CXXFLAGS)
+
+tools_class.o: tools_class.cpp
+	$(CPP) -c tools_class.cpp -o tools_class.o $(CXXFLAGS)
+
+functions.o: functions.cpp
+	$(CPP) -c functions.cpp -o functions.o $(CXXFLAGS)
+
+device_class.o: device_class.cpp
+	$(CPP) -c device_class.cpp -o device_class.o $(CXXFLAGS)
+
+dev_prop_func.o: dev_prop_func.cpp
+	$(CPP) -c dev_prop_func.cpp -o dev_prop_func.o $(CXXFLAGS)
+
+carrier_class.o: carrier_class.cpp
+	$(CPP) -c carrier_class.cpp -o carrier_class.o $(CXXFLAGS)
