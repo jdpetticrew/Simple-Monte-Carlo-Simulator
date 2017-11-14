@@ -18,6 +18,7 @@ SMC_class.cpp contains the class implimentation for the SMC Class
 The SMC class contains all the SMC parameters.
 
 SMC.h contains the definition
+Functions with Get_ are all getter functions.
 
 Jonathan Petticrew, University of Sheffield, 2017.
 */
@@ -25,6 +26,7 @@ Jonathan Petticrew, University of Sheffield, 2017.
 #include "SMC.h"
 #include <math.h>
 #include <stdio.h>
+//Constructor sets non-material specific parameters
 SMC::SMC(){
     q=1.6e-19;  
     hbar=1.0545716818e-34;
@@ -88,6 +90,7 @@ double SMC::Get_Vbi(){return Vbi;
 double SMC::Get_die(){return die;
 };
 
+//Sets the material specific parameters
 void SMC::mat(int x){
 	
 	if (x == 1){ // Silicon Parameters

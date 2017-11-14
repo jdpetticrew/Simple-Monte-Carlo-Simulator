@@ -13,11 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+Contains the function prototypes for the three modes available in main.cpp
+
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
+
 #ifndef MODEL_H
 #define MODEL_H
 
+// device_properties() is defined in device_properties.cpp
 void device_properties(int material);
+
+// drift_velocity() is defined in drift_velocity.cpp
 void drift_velocity(int material);
+
+// ii_coef() is defined in ii_coef.cpp
 void ii_coef(int material);
 
 #endif

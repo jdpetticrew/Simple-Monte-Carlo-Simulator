@@ -36,6 +36,7 @@ tools::tools(SMC *input):constants(input){
             pb2[i][j]=0;
         }
 };
+//Calculates the Scattering Probabilities
 int tools::scattering_probability(){ //calculates the scattering probabilities contained in pb[][] and pb2[][]
     FILE *fp_rate, *fp_pb;
     bool ratefail=false;

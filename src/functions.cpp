@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /*
-functions.cpp contains the function declerations used in drift_velocity.cpp, device_properties.cpp & ii_coef.cpp
+functions.cpp contains the function declerations for the common functions used in all three modes
 function prototypes in functions.h
 
 Jonathan Petticrew, University of Sheffield, 2017.
@@ -31,6 +31,7 @@ double _max(double x,double y)
        if(x>y) return x;
        else return y;
 };
+// seeds the random number generator
 void sgenrand(unsigned long seed)
 {
     int i;
@@ -42,7 +43,9 @@ void sgenrand(unsigned long seed)
     }
     mti=Nr;
 };
-double genrand(){ //quite a lot of the parameters in this function are defined in default_include.h
+
+//calculates the next random number in the seeded mersenne twister.
+double genrand(){ //quite a lot of the parameters in this function are #defined in default_include.h
 	int inputkey;
     double ans;
     unsigned long y;

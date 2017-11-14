@@ -58,6 +58,5 @@ class device{
           double Efield_at_x(double xpos);//returns the Efield for a given position
           double Get_width();
           void profiler(double voltage);
-          ~device();
 };
 #endif

@@ -98,6 +98,7 @@ void carrier::Input_dx(int i, double input){
 double carrier::Get_dx(int i){
 	return dx[i];
 };
+// Resets all the arrays to 0.
 void carrier::reset(){
 	int i;
 	for(i=1;i<(Array+1);i++)
@@ -119,6 +120,8 @@ void carrier::Input_timearray(int i, int input){
 int carrier::Get_timearray(int i){
 	return timearray[i];
 };
+
+//Calculates the new scattering direction and momentums
 void carrier::scatter(int i, int j){
 	double cos_theta,kf;
     if (j==0 ) kf=2*(emass)*Egy[i]/((hbar)*(hbar));
@@ -129,6 +132,7 @@ void carrier::scatter(int i, int j){
     	kxy[i]=kf*(1-cos_theta*cos_theta);
     }
 };
+//Generates a new carrier after an impact ionization event
 void carrier::generation(int i, double z_pos, double Energy, double timein, double dtin, int timearrayin){
 	position[i]=z_pos;
 	Egy[i]=Energy;

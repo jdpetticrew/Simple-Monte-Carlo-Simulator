@@ -13,11 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+dev_prop_func.cpp contains the function definitions for functions that are uniqe to the device_properties mode
+in device_properties.cpp
+
+functions are prototypes in dev_prop_func.h
+
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
 #include "dev_prop_func.h"
 #include <stdio.h>
 #include <tchar.h>
 #include <math.h>
 
+//Counts the Number of Bias in bias_input.txt
 int biascounter(){
 	int inputkey;
 	double voltage;
@@ -33,20 +43,21 @@ int biascounter(){
 	return bias_count;
 };
 
+//Reads in User inout
 int timesliceread(){
 	int timeslice;
 	printf("How many divisions per transit time: \n");
 	scanf("%d",&timeslice);
 	return timeslice;
 };
-
+//Reads in User inout
 int usDeviceread(){
 	int usDevice;
 	printf("1)Pure Electron, 2)Pure Hole:\n");
     scanf("%d",&usDevice);
     return usDevice;
 };
-
+//Reads in User inout
 double simulationtimeread(){
 	double simulationtime;
 	printf("Simulation Time in ps:\n");
@@ -54,7 +65,7 @@ double simulationtimeread(){
 	simulationtime=simulationtime*1e-12;
 	return simulationtime;
 };
-
+//Reads in User inout
 int trialsread(){
 	int Ntrials;
 	printf("Number of trials (Default=10000):\n");
@@ -63,6 +74,7 @@ int trialsread(){
 };
 
 //Calculates Gain, Noise, Mean Time and Jitter (using 0.1ps bin width)
+//This is not as accurate as the Matlab Scripts!!
 void postprocess(double Vsim[],double simtime, int voltages){
 	int numbins=simtime/0.1e-12;	
 	int i;

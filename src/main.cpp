@@ -13,6 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+main.cpp contains the decleration of main for the Simple Monte Carlo Simulator.
+It requests material and mode inputs from the user before running the requested mode.
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
+
 #include <stdio.h>
 #include "model.h"
 #include <conio.h>

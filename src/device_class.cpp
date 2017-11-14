@@ -248,16 +248,4 @@ void device::profiler(double voltagein){
 	width=efield_x[numlayers];
 	//printf("%g\n",width);
 };
-//destructor, deletes the new allocated memory
-//PUBLIC
-device::~device(){
-	delete efield_x;
-	delete efield_e;
-	delete N;
-	delete w;
-	delete G;
-	delete Gw;
-	delete Nwe;
-	delete Nw2e;
-	delete Vtcheck;
-};
+

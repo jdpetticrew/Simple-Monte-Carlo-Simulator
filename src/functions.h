@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /*
-functions.h contains the function prototypes used in drift_velocity.cpp, device_properties.cpp & ii_coef.cpp
+functions.h contains the function prototypes for the common functions used in all three modes
 function declerations in functions.cpp
 
 Jonathan Petticrew, University of Sheffield, 2017.

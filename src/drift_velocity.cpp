@@ -13,6 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+drift_velocity.cpp contains drift_velocity() which calculates the drift velocity in a given material.
+
+Takes user input for Minimum,Maximum for Electric Fields.
+Takes material input from main.cpp
+
+Prototyped in model.h
+
+Uses the Classes SMC & tools.
+Also uses functions.h which contains common functions used in all three modes.
+Calculates the drift velocity for electrons and holes by tracking their movement through the material
+until they have undergone 1000000 scattering events each.
+
+There total movment is then divided by the time it took to travel that far to calculate the drift velocities.
+The velocities are outputted to epdf and hpdf.
+
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
+
 #include "model.h"
 #include "SMC.h"
 #include "functions.h"
@@ -21,9 +41,9 @@ limitations under the License.*/
 #include <math.h>
 
 void drift_velocity(int material){
-	SMC constants;
-	constants.mat(material);
-	SMC *pointSMC = &constants;
+	SMC constants; //SMC parameter set
+	constants.mat(material); //Tells SMC parameter set which material
+	SMC *pointSMC = &constants; //Used to pass constants to other classes.
 	double minEfield, maxEfield;
 	printf(" Minimum Electric Field (kV/cm):\n");
 	scanf("%lf",&minEfield);
@@ -31,7 +51,7 @@ void drift_velocity(int material){
 	scanf("%lf",&maxEfield);
 	tools simulation(pointSMC);
     simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
-    sgenrand(4358);//seeds the random number generator      
+    sgenrand(4358);//seeds the random number generator constant used to alow for comparison using different parameters.    
 	double Esim,Eloop,z_pos,kf,kxy,kz,cos_theta,Energy;
 	int tn, pair, scat_e;
 		FILE *epdf;
@@ -40,20 +60,20 @@ void drift_velocity(int material){
 		hpdf=fopen("hvelocity.txt","w");
 	for(Esim=minEfield;Esim<=maxEfield;Esim+=1){
 
-		Eloop=Esim*1e5;
+		Eloop=Esim*1e5;//change elecric field from kV/cm to V/m.
 		z_pos=0;
 		Energy=0;
-		kf=0;
-		kxy=0;
-		kz=0;
-		cos_theta=0;
+		kf=0; //Kf^2=Kx^2+Ky^2+Kz^2
+		kxy=0; // combined momentum tangential to travel direction.
+		kz=0; // z momentum (direction of travel)
+		cos_theta=0; //scattering angle
 		tn=0;
 		double drift_t=0;
 		double dE=0;
 		int counter=0;
 		double vtotal=0;
 		//electrons
-		for(counter=0;counter<1000000;counter++){
+		for(counter=0;counter<1000000;counter++){ //loop for 1000000 scattering events
 			if(scat_e==0){
 				double cos_theta;
                 kf=2*constants.Get_e_mass()*Energy/(constants.Get_hbar()*constants.Get_hbar());
@@ -74,6 +94,7 @@ void drift_velocity(int material){
             //electron drift process ends
             double velocity = dE/(constants.Get_q()*Eloop*drift_t);
             vtotal += (velocity);
+            // electron scattering process starts
             double random2;
             int Eint;
             Eint=floor(Energy*1000.0/constants.Get_q()+0.5);

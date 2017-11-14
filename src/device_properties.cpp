@@ -13,6 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+device_properties.cpp contains device_properties() which calculates the device properties for a given device in a given material.
+
+Takes user input for divisions per transit time, injection condition, simulation time and number of trials.
+Takes material input from main.cpp
+Reads in applied biasses from the user generated file bias_input.txt
+Uses the read in device structure from the user generated file doping_profile.txt contained in the device class.
+
+Uses the Classes SMC, Carrier, Device & tools.
+Also uses functions.h which contains common functions used in all three modes.
+Also uses dev_prop_func.h which contains functions unique to the device properties mode.
+
+Prototyped in model.h
+
+Calculates Gain, Excess Noise Factor, Breakdown Probability and Timing Statistics.
+
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
 #include "model.h"
 #include "SMC.h"
 #include "device.h"
@@ -27,15 +46,16 @@ limitations under the License.*/
 void device_properties(int material){
 	int timearray, Highest;  
     double cumulative, voltage;
-    SMC constants; // constants will be the parameter set
+    SMC constants; //SMC parameter set
     constants.mat(material); // tell constants what material to use
-    SMC *pointSMC = &constants;
-    device diode(pointSMC);
+    SMC *pointSMC = &constants; //Used to pass constants to other classes.
+    device diode(pointSMC); // Device Class
     FILE *out;  
     double BreakdownCurrent=1e-4; //define the current threshold for avalanche breakdown as 0.1mA
     if ((out=fopen("multiplication.txt","w"))==NULL)//Opens and error checks
     {   printf("Error: multiplication.txt can't open\n");
     }
+    
 	//read in bias
 	int bias_count=biascounter(); //counts number of voltages to be simulated
 	FILE *bias;	
@@ -57,7 +77,7 @@ void device_properties(int material){
     double Ntrials = trialsread();
     tools simulation(pointSMC);
     simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
-    sgenrand(835800);//seeds the random number generator      	
+    sgenrand(835800);//seeds the random number generator constant used to alow for comparison using different parameters.       	
     int num;    
     double Efield,nth,npha,nph,nphe,nii,nsse,Energy,z_pos,dE,kf,kxy,kz,nssh;
     double drift_t;
@@ -87,6 +107,7 @@ void device_properties(int material){
     for (Iarray=0;Iarray<CurrentArray;Iarray++){
     	I[Iarray]=0;    	
 	}
+	//generate files for simulated voltage output.
 	FILE *tbout;
 	FILE *Mout;
 	char nametb[] = "time_to_breakdown.txt";
@@ -157,8 +178,7 @@ void device_properties(int material){
          
 
 		 /* Device 1-PIN
-		    Device 2-NIP
-		    Device 3-PN*/
+		    Device 2-NIP*/
 
          if (usDevice==1){
             electron->Input_pos(1,1e-10);
@@ -170,7 +190,7 @@ void device_properties(int material){
              hole->Input_pos(1,(diode.Get_width()-1e-10));
              prescent_carriers=1;
          }
-
+		//carrierlimit is a threshold to end the simulation early
          double carrierlimit=BreakdownCurrent*diode.Get_width()/(5*constants.Get_q()*1e5);
 
          /****TRACKS CARRIERS WHILE IN DIODE****/
@@ -184,9 +204,12 @@ void device_properties(int material){
                    time=electron->Get_time(pair);
                    dt=electron->Get_dt(pair);
                    dx=electron->Get_dx(pair);
-                   if(z_pos<0) z_pos=1e-10; // resets a bad trial
+                   if(z_pos<0) z_pos=1e-10; // resets a bad trial where the electron drifted out the device the wrong way (extremly rare but causes program to hang) 
+                   
+                   //If flag stays 0 for all the devices it means that there are no carriers behind globaltime and globaltime can be advanced
+                   //Doing this limits the program to only be simulating the carriers in the same timebin at the same time (Important for calculating instentanious current) 
                    if(z_pos<diode.Get_width() && time<globaltime)//checks inside field
-                   {    flag++;                
+                   {    flag++; //used to advance globaltime    
 				   		Energy=electron->Get_Egy(pair);						                   		
                         if((electron->Get_scattering(pair)==0))//if not selfscattering scatters in random direction
                         {   electron->scatter(pair,0);
@@ -222,6 +245,7 @@ void device_properties(int material){
                         	previous=electron->Get_timearray(pair);
                         	int test;
                         	for(test=(previous+1);test<(timearray+1);test++){
+                        		//Uses Ramos Theorem Here
                         		I[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
                         		Inum[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
 							}
@@ -413,7 +437,7 @@ void device_properties(int material){
                    
 				   if(flag==0){
 				    globaltime+=timestep;
-					//printf("Step through time\n");
+					//This is where globaltime is incrimented
 				   }
               }
               int scan=0;
@@ -438,7 +462,8 @@ void device_properties(int material){
          Ms+=(tn*tn/Ntrials); //accumilates average Ms, used to calculate noise
          cumulative+=tn; //tracks average gain so far in simulation
          double printer=cumulative/num;        
-
+		
+		//reset carrier arrays to 0 after trial
        electron->reset();
 	   hole->reset(); 
 	   //checks for breakdown at end of sim
@@ -454,6 +479,7 @@ void device_properties(int material){
     		}
 		}
 	   
+	   //trapezium rule
 	    int arealimitnum=0;
 	    double totalareanum=0;
 	    double area,totalarea,x1,x2,y1,y2;

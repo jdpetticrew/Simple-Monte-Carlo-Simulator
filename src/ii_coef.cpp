@@ -14,8 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.*/
 
 /*
-
 ii_coef.cpp contains ii_coef() which calculates the impact ionization coefficients for a given material.
+
+Takes user input for Minimum,Maximum and Step size for Electric Fields.
+Takes material input from main.cpp
+
+Prototyped in model.h
+
+Uses the Classes SMC & tools.
+Also uses functions.h which contains common functions used in all three modes.
+Calculates the ionization coefficents (Alpha & Beta) by tracking the movement for an electron and a hole
+for 20000 impact ionization events.
+Distance moved between impact ionization events is output to epdf and hpdf for each Electric field strength.
+Alpha and Beta are calculated as 1/(mean between ionization events) and output to abMean.
 
 Jonathan Petticrew, University of Sheffield, 2017.
 */
@@ -30,9 +41,9 @@ Jonathan Petticrew, University of Sheffield, 2017.
 #include <tchar.h>
 
 void ii_coef(int material){
-	SMC constants;
-	constants.mat(material);
-	SMC *pointSMC = &constants;
+	SMC constants; //SMC parameter set
+	constants.mat(material); //Tells SMC parameter set which material
+	SMC *pointSMC = &constants; //Used to pass constants to other classes.
 	double minEfield, maxEfield, stepEfield;
 	printf(" Minimum Electric Field (kV/cm):\n");
 	scanf("%lf",&minEfield);
@@ -42,13 +53,16 @@ void ii_coef(int material){
 	scanf("%lf",&stepEfield);
 	tools simulation(pointSMC);
     simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
-    sgenrand(4358);//seeds the random number generator      
+    sgenrand(4358);//seeds the random number generator constant used to alow for comparison using different parameters.     
 	double Esim,Eloop,z_pos,kf,kxy,kz,cos_theta,Energy;
 	int tn, pair, scat_e;
 	FILE *about;
 	about=fopen("alpha_beta.txt","w");
 	fprintf(about,"Efield (kV/cm),  Alpha (1/m), Beta (1/m)\n");
+	
+	/*** EFIELD LOOP STARTS HERE ***/
 	for(Esim=minEfield;Esim<=maxEfield;Esim+=stepEfield){
+		//Generate the output files for the electric field
 		FILE *epdf;
 		FILE *hpdf;
 		char ename[] = "epdf.txt";
@@ -61,21 +75,22 @@ void ii_coef(int material){
 		snprintf(hfile,sizeof(hfile),"%s%s",Eprint,hname);
 		epdf=fopen(efile,"w");
 		hpdf=fopen(hfile,"w");
-		Eloop=Esim*1e5;
+		//Reset variables to 0.
+		Eloop=Esim*1e5; //change elecric field from kV/cm to V/m.
 		z_pos=0;
 		Energy=0;
-		kf=0;
-		kxy=0;
-		kz=0;
-		cos_theta=0;
-		tn=0;
+		kf=0; //Kf^2=Kx^2+Ky^2+Kz^2
+		kxy=0;// combined momentum tangential to travel direction.
+		kz=0; // z momentum (direction of travel)
+		cos_theta=0; //scattering angle
+		tn=0; //impact ionization counter
 		double drift_t=0;
 		double dE=0;
 		double alpha_distance=0;
 		double beta_distance=0;
 		
 		//electrons
-		while(tn<20000){
+		while(tn<20000){ //loops for 20000 electron impact ionization events.
 			if(scat_e==0){
 				double cos_theta;
                 kf=2*constants.Get_e_mass()*Energy/(constants.Get_hbar()*constants.Get_hbar());
@@ -95,9 +110,10 @@ void ii_coef(int material){
             z_pos+=dE/(constants.Get_q()*Eloop);						
             //electron drift process ends
             
+            //electron scattering process starts
             double random2;
             int Eint;
-            Eint=floor(Energy*1000.0/constants.Get_q()+0.5);
+            Eint=floor(Energy*1000.0/constants.Get_q()+0.5); //bins energy to compare against probability curves from tools class.
             if (Energy>constants.Get_Emax()){
                 Eint= constants.Get_NUMPOINTS();
                 random2=simulation.Get_pb(2,constants.Get_NUMPOINTS());
@@ -128,6 +144,7 @@ void ii_coef(int material){
 
 		}
 	
+		//reset variables to 0
 		z_pos=0;
 		Energy=0;
 		kf=0;
@@ -139,7 +156,7 @@ void ii_coef(int material){
 		dE=0;
 		
 		//holes
-		while(tn<20000){
+		while(tn<20000){// loops for 20000 impact ionization events for holes.
 			if(scat_e==0){
 				double cos_theta;
                 kf=2*constants.Get_h_mass()*Energy/(constants.Get_hbar()*constants.Get_hbar());
@@ -159,6 +176,7 @@ void ii_coef(int material){
             z_pos-=dE/(Eloop*constants.Get_q());						
             //hole drift process ends
             
+            // hole scattering process starts
             double random22;
             int Eint2;
             Eint2=floor(Energy*1000.0/constants.Get_q()+0.5);
@@ -188,12 +206,13 @@ void ii_coef(int material){
             else if(random22>simulation.Get_pb2(2,Eint2)) //selfscattering
             {    scat_e=1;
         	}
-                             //electron scattering process ends
+            //hole scattering process ends
 
 		}
 		
 		fclose(epdf);
 		fclose(hpdf);
+		// convert distance travelled to alpha, beta and output to file.
 		double alpha=tn/alpha_distance;
 		double beta=tn/beta_distance;
 		fprintf(about, "%lf %e %e\n", Esim, alpha, beta);
