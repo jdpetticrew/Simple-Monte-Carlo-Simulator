@@ -35,6 +35,9 @@ void ii_coef(int material){
     sgenrand(4358);//seeds the random number generator      
 	double Esim,Eloop,z_pos,kf,kxy,kz,cos_theta,Energy;
 	int tn, pair, scat_e;
+	FILE *about;
+	about=fopen("alpha_beta.txt","w");
+	fprintf(about,"Efield (kV/cm),  Alpha (1/m), Beta (1/m)\n");
 	for(Esim=minEfield;Esim<=maxEfield;Esim+=20){
 		FILE *epdf;
 		FILE *hpdf;
@@ -58,6 +61,8 @@ void ii_coef(int material){
 		tn=0;
 		double drift_t=0;
 		double dE=0;
+		double alpha_distance=0;
+		double beta_distance=0;
 		
 		//electrons
 		while(tn<20000){
@@ -103,6 +108,7 @@ void ii_coef(int material){
                 tn++;
                 scat_e=0;
                 fprintf(epdf,"%d %e\n", tn, z_pos);
+                alpha_distance+=z_pos;
                 z_pos=0;
             }
             else if(random2>simulation.Get_pb(2,Eint)) //selfscattering
@@ -166,6 +172,7 @@ void ii_coef(int material){
                 tn++;
                 scat_e=0;
                 fprintf(hpdf,"%d %e\n", tn, -z_pos);
+                beta_distance-=z_pos;
                 z_pos=0;
             }
             else if(random22>simulation.Get_pb2(2,Eint2)) //selfscattering
@@ -177,5 +184,9 @@ void ii_coef(int material){
 		
 		fclose(epdf);
 		fclose(hpdf);
+		double alpha=tn/alpha_distance;
+		double beta=tn/beta_distance;
+		fprintf(about, "%lf %e %e\n", Esim, alpha, beta);
 	}
+	fclose(about);
 }
