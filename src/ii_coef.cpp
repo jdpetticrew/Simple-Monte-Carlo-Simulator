@@ -13,6 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
+/*
+
+ii_coef.cpp contains ii_coef() which calculates the impact ionization coefficients for a given material.
+
+Jonathan Petticrew, University of Sheffield, 2017.
+*/
+
+
 #include "model.h"
 #include "SMC.h"
 #include "functions.h"
@@ -25,11 +33,13 @@ void ii_coef(int material){
 	SMC constants;
 	constants.mat(material);
 	SMC *pointSMC = &constants;
-	double minEfield, maxEfield;
+	double minEfield, maxEfield, stepEfield;
 	printf(" Minimum Electric Field (kV/cm):\n");
 	scanf("%lf",&minEfield);
 	printf(" Maximum Electric Field (kV/cm):\n");
 	scanf("%lf",&maxEfield);
+	printf("Electric Field Step Size (kV/cm):\n");
+	scanf("%lf",&stepEfield);
 	tools simulation(pointSMC);
     simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
     sgenrand(4358);//seeds the random number generator      
@@ -38,7 +48,7 @@ void ii_coef(int material){
 	FILE *about;
 	about=fopen("alpha_beta.txt","w");
 	fprintf(about,"Efield (kV/cm),  Alpha (1/m), Beta (1/m)\n");
-	for(Esim=minEfield;Esim<=maxEfield;Esim+=20){
+	for(Esim=minEfield;Esim<=maxEfield;Esim+=stepEfield){
 		FILE *epdf;
 		FILE *hpdf;
 		char ename[] = "epdf.txt";
