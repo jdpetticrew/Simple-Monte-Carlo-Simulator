@@ -18,11 +18,12 @@ dev_prop_func.cpp contains the function definitions for functions that are uniqe
 in device_properties.cpp
 
 functions are prototypes in dev_prop_func.h
-
+Uses the class histogram in postprocess()
 Jonathan Petticrew, University of Sheffield, 2017.
 */
 
 #include "dev_prop_func.h"
+#include "histogram.h"
 #include <stdio.h>
 #include <tchar.h>
 #include <math.h>
@@ -74,7 +75,6 @@ int trialsread(){
 };
 
 //Calculates Gain, Noise, Mean Time and Jitter (using 0.1ps bin width)
-//This is not as accurate as the Matlab Scripts!!
 void postprocess(double Vsim[],double simtime, int voltages){
 	int numbins=simtime/0.1e-12;	
 	int i;
@@ -117,58 +117,28 @@ void postprocess(double Vsim[],double simtime, int voltages){
 	    snprintf(fileT,sizeof(fileT),"%s%s",voltagetb,nameT);
 	    if((Tout=fopen(fileT,"r"))!=NULL){
 	    	count=0;
-	    	double Ttime=0;
-	    	int bin;
-	    	while((fscanf(Tout,"%d %lf\n",&event,&scanned))>0){
-	    		scanned=scanned/1e-12;
+	    	int dump;
+	    	double dump2;
+	    	while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0){
 	    		count++;
-	    		Ttime+=scanned;
-	    		//bin=floor(scanned/0.1);
-	    		//Hist[bin]=Hist[bin]+1;
-	    		for(bin=0;bin<(numbins-1);bin++){
-	    			double test1,test2;
-	    			test1=0.1*bin;
-	    			test2=test1+0.1;
-	    			if(scanned>=test1 && scanned<test2){
-	    				Hist[bin]=Hist[bin]+1;
-	    				break;
-					}
-				}
 			}
-			int k=0;
-			int j=0;
-			double max=0;
-			for(k=0;k<numbins;k++){
-				if(Hist[k]>Hist[j]){
-					j=k;
-					max=Hist[k];
-				}
+			double data[count]={0};
+			rewind(Tout);
+			count=0;
+			while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0){
+				data[count]=dump2/1e-12;
+				count++;
 			}
-			double shift=max/2;
-			for(k=0;k<numbins;k++){
-				Hist[k]=fabs(Hist[k]-shift);
-			}
-			int k1=0;
-			int k2=0;
-			double min1=max;
-			double min2=max;
-			for(k=0;k<j;k++){
-				if(Hist[k]<min1){
-					k1=k;
-					min1=Hist[k];
-				}
-			}
-			for(k=j;k<numbins;k++){
-				if(Hist[k]<min2){
-					k2=k;
-					min2=Hist[k];
-				}
-			}
-			J[i]=0.1*(k2-k1);
-			T[i]=Ttime/count;
 	    	fclose(Tout);
+	    	char nameH[]="Hist.txt";
+	    	char fileH[strlen(voltagetb)+strlen(nameH)+1];
+	    	snprintf(fileH,sizeof(fileH),"%s%s",voltagetb,nameH);
+	    	histogram hist(data,count,0.1,fileH);
+	    	T[i]=hist.Get_Mean();
+	    	J[i]=hist.Get_FWHM();
+	    	fprintf(results,"%lf %lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i],J[i]);
 		}
-		fprintf(results,"%lf %lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i],J[i]);
+		else fprintf(results,"%lf %lf %lf\n",Vsim[i],G[i],F[i]);
 	}
 	fclose(results);
 };
