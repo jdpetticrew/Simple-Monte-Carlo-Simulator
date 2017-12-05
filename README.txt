@@ -17,7 +17,7 @@ Can produce the following characteristics of an input APD or SPAD structure.
 - Excess Noise Factor
 - Breakdown Probability
 - Mean Time to Breakdown
-- Timing Jitter
+
 
 Drift Velocity Mode:
 Can produce the following characteristics of a simulated material.

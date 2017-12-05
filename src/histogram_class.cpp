@@ -1,6 +1,9 @@
 /* Copyright 2017 Advanced Detector Centre, Department of Electronic and
 Electrical Engineering, University of Sheffield, UK.
 
+Modifications Copyright 2017, Advanced Detector Centre, Department of Electronic and
+Electrical Engineering, University of Sheffield, UK.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -167,7 +170,7 @@ void histogram::print(){
 	charstored=0;
 	FILE *binout;
 	binout=fopen("Hist.txt","w");
-	fprintf(binout,"f(x)= %lf * exp(-((x-%lf)/%lf)^2)\n",a,b,c);
+	//fprintf(binout,"f(x)= %lf * exp(-((x-%lf)/%lf)^2)\n",a,b,c);
 	int i;
 	for(i=0;i<bins;i++){
 		fprintf(binout,"%lf, %lf\n",binCenters[i], binValues[i]);
@@ -180,7 +183,7 @@ void histogram::print_custom(){
 	charstored=1; //tells destructor to delete filename
 	FILE *binout;
 	binout=fopen(filename,"w");
-	fprintf(binout,"f(x)= %lf * exp(-((x-%lf)/%lf)^2)\n",a,b,c);
+	//fprintf(binout,"f(x)= %lf * exp(-((x-%lf)/%lf)^2)\n",a,b,c);
 	int i;
 	for(i=0;i<bins;i++){
 		fprintf(binout,"%lf, %lf\n",binCenters[i], binValues[i]);
