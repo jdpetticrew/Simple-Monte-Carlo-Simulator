@@ -83,7 +83,7 @@ void postprocess(double Vsim[],double simtime, int voltages){
 	double T[voltages]={0};
 	FILE *results;
 	results=fopen("result.txt","w");
-	fprintf(results,"Voltage Gain Noise MeanTime(ps)");
+	fprintf(results,"Voltage Gain Noise MeanTime(ps)\n");
 	for(i=0;i<voltages;i++){
 		double Hist[numbins]={0};
 		double V=Vsim[i];
@@ -122,20 +122,26 @@ void postprocess(double Vsim[],double simtime, int voltages){
 	    	while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0){
 	    		count++;
 			}
-			double data[count]={0};
-			rewind(Tout);
-			count=0;
-			while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0){
-				data[count]=dump2/1e-12;
-				count++;
+			if(count>0){
+				double data[count]={0};			
+				rewind(Tout);
+				count=0;
+				while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0){
+					data[count]=dump2/1e-12;
+					count++;
+				}
+		    	fclose(Tout);
+		    	char nameH[]="Hist.txt";
+		    	char fileH[strlen(voltagetb)+strlen(nameH)+1];
+		    	snprintf(fileH,sizeof(fileH),"%s%s",voltagetb,nameH);
+		    	histogram hist(data,count,0.1,fileH);
+		    	T[i]=hist.Get_Mean();
+		    	fprintf(results,"%lf %lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i]);
 			}
-	    	fclose(Tout);
-	    	char nameH[]="Hist.txt";
-	    	char fileH[strlen(voltagetb)+strlen(nameH)+1];
-	    	snprintf(fileH,sizeof(fileH),"%s%s",voltagetb,nameH);
-	    	histogram hist(data,count,0.1,fileH);
-	    	T[i]=hist.Get_Mean();
-	    	fprintf(results,"%lf %lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i]);
+			else{
+				fclose(Tout);
+				fprintf(results,"%lf %lf %lf --\n",Vsim[i],G[i],F[i]);
+			} 
 		}
 		else fprintf(results,"%lf %lf %lf --\n",Vsim[i],G[i],F[i]);
 	}
