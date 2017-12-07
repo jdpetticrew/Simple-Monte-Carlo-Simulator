@@ -2,8 +2,7 @@ Simple Monte Carlo Simulator
 
 The Simple Monte Carlo Simulator is a standalone executables capable of simulating
 Avalanche Photodiode (APD) and Single Photon Avalanche Photodiode (SPAD) characteristics.
-Written in C++, with additional tools from Matlab R2015a for data analysis.
-See documentation for information on the Matlab tools.
+Written in C++.
 
 ----------------------
 Software Capabilities
