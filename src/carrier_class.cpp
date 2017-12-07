@@ -23,11 +23,9 @@ Jonathan Petticrew, University of Sheffield, 2017.
 */
 
 #include "carrier.h"
-#include <assert.h>
 #include "functions.h"
 #include "math.h"
 //All these functions are for Get, Set and Zero.
-//Assert is being used to pick up array overflow vilations which were causing problems.
 carrier::carrier(SMC *input):constants(input){
 	int i;
 	emass= constants->Get_e_mass();
@@ -46,23 +44,18 @@ carrier::carrier(SMC *input):constants(input){
 	}
 };
 void carrier::Input_pos(int i, double input){
-	 assert(i<Array && "Position array violated");
      position[i]=input;
 };
 void carrier::Input_Egy(int i, double input){
-	assert(i<Array && "Egy array violated");
      Egy[i]=input;
 };
 void carrier::Input_kxy(int i, double input){
-	assert(i<Array && "kxy array violated");
      kxy[i]=input;
 };
 void carrier::Input_scattering(int i, int input){
-	assert(i<Array && "Scattering array violated");
      scattering[i]=input;
 };
 void carrier::Input_kz(int i, double input){
-	assert(i<Array && "kz array violated");
      kz[i]=input;
 };
 double carrier::Get_pos(int i){return position[i];
@@ -78,21 +71,18 @@ int carrier::Get_scattering(int i){return scattering[i];
 carrier::~carrier(){
 };
 void carrier::Input_time(int i, double input){
-	assert(i<Array && "time array violated");
 	time[i]=input;
 };
 double carrier::Get_time(int i){
 	return time[i];
 };
 void carrier::Input_dt(int i, double input){
-	assert(i<Array && "dt array violated");
 	dt[i]=input;
 };
 double carrier::Get_dt(int i){
 	return dt[i];
 };
 void carrier::Input_dx(int i, double input){
-	assert(i<Array && "dx array violated");
 	dx[i]=input;
 };
 double carrier::Get_dx(int i){
@@ -114,7 +104,6 @@ void carrier::reset(){
 	}
 };
 void carrier::Input_timearray(int i, int input){
-	assert(i<Array && "timearray violated");
 	timearray[i]=input;
 };
 int carrier::Get_timearray(int i){

@@ -74,7 +74,7 @@ int trialsread(){
     return Ntrials;
 };
 
-//Calculates Gain, Noise, Mean Time and Jitter (using 0.1ps bin width)
+//Calculates Gain, Noise, Mean Time (using 0.1ps bin width)
 void postprocess(double Vsim[],double simtime, int voltages){
 	int numbins=simtime/0.1e-12;	
 	int i;
