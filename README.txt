@@ -46,6 +46,8 @@ File Structure
 	Contains the Source Code
 -User Files
 	Contains examples of input files required for diode properties mode.
+-Build
+	Contains a compiled exe for each tagged version.
 
 ----------------------
 Citations
