@@ -52,8 +52,8 @@ void device_properties(int material){
     device diode(pointSMC); // Device Class
     FILE *out;  
     double BreakdownCurrent=1e-4; //define the current threshold for avalanche breakdown as 0.1mA
-    if ((out=fopen("multiplication.txt","w"))==NULL)//Opens and error checks
-    {   printf("Error: multiplication.txt can't open\n");
+    if ((out=fopen("Result_1.txt","w"))==NULL)//Opens and error checks
+    {   printf("Error: Result_1.txt can't open\n");
     }
     
 	//read in bias

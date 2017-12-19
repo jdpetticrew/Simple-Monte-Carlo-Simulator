@@ -82,7 +82,7 @@ void postprocess(double Vsim[],double simtime, int voltages){
 	double F[voltages]={0};
 	double T[voltages]={0};
 	FILE *results;
-	results=fopen("result.txt","w");
+	results=fopen("result_2.txt","w");
 	fprintf(results,"Voltage Gain Noise MeanTime(ps)\n");
 	for(i=0;i<voltages;i++){
 		double Hist[numbins]={0};
