@@ -12,7 +12,7 @@ The three modes are "Diode Properties", "Drift Velocity" & "Impact Ionization Co
 
 Diode Properties Mode:
 Can produce the following characteristics of an input APD or SPAD structure.
-- Gain/Multiplication
+- Avalanche Gain/Multiplication Factor
 - Excess Noise Factor
 - Breakdown Probability
 - Mean Time to Breakdown
@@ -62,7 +62,7 @@ DOI: https://doi.org/10.1088/1748-0221/7/08/P08006
 
 Indium Gallium Phosphide
 C. H. Tan, R. Ghin, J. P. R. David, G. J. Rees, and M. Hopkinson, ‘The effect of dead
-space on gain and excess noise in In0. 48Ga0. 52P p+ in+ diodes’, Semiconductor science
+space on gain and excess noise in In0.48Ga0.52P p+ in+ diodes’, Semiconductor Science
 and technology, vol. 18, no. 8, p. 803, 2003.
 DOI: https://doi.org/10.1088/0268-1242/18/8/314
 

@@ -14,7 +14,7 @@ no.4, pp.769-775. DOI: https://doi.org/10.1109/16.753712
 
 This product uses the InGaP parameter set from
 C. H. Tan, R. Ghin, J. P. R. David, G. J. Rees, and M. Hopkinson, ‘The effect of dead
-space on gain and excess noise in In0. 48Ga0. 52P p+ in+ diodes’, Semiconductor science
+space on gain and excess noise in In0.48Ga0.52P p+ in+ diodes’, Semiconductor Science
 and technology, vol. 18, no. 8, p. 803, 2003.
 DOI: https://doi.org/10.1088/0268-1242/18/8/314
 
