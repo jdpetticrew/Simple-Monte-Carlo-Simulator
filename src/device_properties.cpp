@@ -516,6 +516,7 @@ void device_properties(int material){
 	}
     fflush(out);  
 	fclose(tbout);
+	if(breakdown==0){
 	FILE *Iout;
     char name[] = "current.txt";
     char Vsimchar[8];
@@ -527,8 +528,8 @@ void device_properties(int material){
         printf("Error: current.txt\n");
     }
     fprintf(Iout,"V= %f \n", Vsim);
-    fprintf(Iout,"time units in %e s\n",timestep);
-    fprintf(Iout,"t                I                I/e \n");   
+    fprintf(Iout,"time step size in %e s\n",timestep);
+    fprintf(Iout,"t                I \n");   
     int Ioutprint =0;
 	int i;
     for(i=0;i<CurrentArray;i++)
@@ -536,16 +537,17 @@ void device_properties(int material){
         double current = I[i]/(double)Ntrials;
     	double count=I[i]/(constants.Get_q()*(double)Ntrials);
         if(I[i]>0 && Ioutprint <50){
-			fprintf(Iout,"%g %g %g \n",timeprint,current,count);
+			fprintf(Iout,"%g %g \n",timeprint,current);
 			Ioutprint=0;
 		}
 		else if(Ioutprint <50){
-			fprintf(Iout,"%g %g %g \n",timeprint,current,count);
+			fprintf(Iout,"%g %g \n",timeprint,current);
 			Ioutprint++;
 		}		
 	}
 	fflush(Iout);
 	fclose(Iout);
+	}
 	delete [] I;
 	delete [] Inum;
 	fclose(counter);
