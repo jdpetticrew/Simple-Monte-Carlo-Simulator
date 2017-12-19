@@ -493,7 +493,8 @@ void device_properties(int material){
 			area=y1*(x2-x1)+0.5*(y2-y1)*(x2-x1);
 			totalareanum+=area;			
 		}
-		fprintf(Mout, "%d %g\n",num, totalareanum);
+		totalareanum=totalareanum/1.6e-19;
+		fprintf(Mout, "%d %g %g\n",num, totalareanum, tn);
 		fflush(Mout);
 		double Pbprint=breakdown/num;
 		 if(!(num%100)){
