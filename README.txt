@@ -56,13 +56,13 @@ Citations
 Please use the following citations for the material parameter sets:
 
 Silicon
-X. Zhou, J. S. Ng, and C. H. Tan, ‘A simple Monte Carlo model for prediction of
-avalanche multiplication process in Silicon’,J. Inst., vol. 7, no. 08, p. P08006, 2012.
+X. Zhou, J. S. Ng, and C. H. Tan, â€˜A simple Monte Carlo model for prediction of
+avalanche multiplication process in Siliconâ€™,J. Inst., vol. 7, no. 08, p. P08006, 2012.
 DOI: https://doi.org/10.1088/1748-0221/7/08/P08006
 
 Indium Gallium Phosphide
-C. H. Tan, R. Ghin, J. P. R. David, G. J. Rees, and M. Hopkinson, ‘The effect of dead
-space on gain and excess noise in In0.48Ga0.52P p+ in+ diodes’, Semiconductor Science
+C. H. Tan, R. Ghin, J. P. R. David, G. J. Rees, and M. Hopkinson, â€˜The effect of dead
+space on gain and excess noise in In0.48Ga0.52P p+in+ diodesâ€™, Semiconductor Science
 and technology, vol. 18, no. 8, p. 803, 2003.
 DOI: https://doi.org/10.1088/0268-1242/18/8/314
 
