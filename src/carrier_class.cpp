@@ -110,7 +110,7 @@ int carrier::Get_timearray(int i){
 	return timearray[i];
 };
 
-//Calculates the new scattering direction and momentums
+//Calculates the new scattering direction and momenta
 void carrier::scatter(int i, int j){
 	double cos_theta,kf;
     if (j==0 ) kf=2*(emass)*Egy[i]/((hbar)*(hbar));
