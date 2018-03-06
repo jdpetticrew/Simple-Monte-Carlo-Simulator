@@ -44,21 +44,29 @@ Jonathan Petticrew, University of Sheffield, 2017.
 #include <math.h>
 
 void device_properties(int material){
-	int timearray, Highest;  
+	FILE *userin;
+	if ((userin=fopen("user_inputs.txt","w"))==NULL)//Opens and error checks
+	{
+				printf("Error: user_inputs.txt can't be opened'\n");
+	}
+	if(material == 1) fprintf(userin,"Silicon\n");
+	else if(material == 2) fprintf(userin,"Gallium Arsenide\n");
+	else if(material ==3) fprintf(userin,"Indium Gallium Phosphide\n");
+	int timearray, Highest;
     double cumulative, voltage;
     SMC constants; //SMC parameter set
     constants.mat(material); // tell constants what material to use
     SMC *pointSMC = &constants; //Used to pass constants to other classes.
     device diode(pointSMC); // Device Class
-    FILE *out;  
+    FILE *out;
     double BreakdownCurrent=1e-4; //define the current threshold for avalanche breakdown as 0.1mA
     if ((out=fopen("Result_1.txt","w"))==NULL)//Opens and error checks
     {   printf("Error: Result_1.txt can't open\n");
     }
-    
+
 	//read in bias
 	int bias_count=biascounter(); //counts number of voltages to be simulated
-	FILE *bias;	
+	FILE *bias;
     if ((bias=fopen("bias_input.txt","r"))==NULL)//Opens and error checks
     {
         	printf("Error: bias.txt can't be opened'\n");
@@ -70,18 +78,24 @@ void device_properties(int material){
     	bias_count++;
 	}
     fclose(bias);
-    			
+
 	int timeslice = timesliceread();
-	int usDevice = usDeviceread();	    
-    double simulationtime = simulationtimeread();    
+	fprintf(userin,"Divisions Per Transit time: %d\n", timeslice);
+	int usDevice = usDeviceread();
+	if (usDevice==1) fprintf(userin, "Pure Electron Simulation\n");
+	else if (usDevice==2) fprintf(userin, "Pure Hole Simulation\n");
+    double simulationtime = simulationtimeread();
+		fprintf(userin, "Simulation time limit: %g ps\n",simulationtime/1e-12);
     double Ntrials = trialsread();
+		fprintf(userin, "Numer of Trials: %lf\n",Ntrials);
+		fclose(userin);
     tools simulation(pointSMC);
     simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
-    sgenrand(835800);//seeds the random number generator constant used to alow for comparison using different parameters.       	
-    int num;    
+    sgenrand(835800);//seeds the random number generator constant used to alow for comparison using different parameters.
+    int num;
     double Efield,nth,npha,nph,nphe,nii,nsse,Energy,z_pos,dE,kf,kxy,kz,nssh;
     double drift_t;
-	
+
 	// create electron and hole classes, too large for stack so have been created with new.
     carrier* electron=new carrier(pointSMC);
 	carrier* hole=new carrier(pointSMC);
@@ -93,7 +107,7 @@ void device_properties(int material){
     for(bias_array=0;bias_array<bias_count;bias_array++)
     {
     Vsim=V[bias_array];
-    
+
     diode.profiler(Vsim);//generates field profile for diode
     printf("Width = %e \n", diode.Get_width());
     double timestep=diode.Get_width()/((double)timeslice*1e5); //Time tracking step size in seconds
@@ -105,7 +119,7 @@ void device_properties(int material){
 	double* Inum=new double[CurrentArray];
 	int Iarray;
     for (Iarray=0;Iarray<CurrentArray;Iarray++){
-    	I[Iarray]=0;    	
+    	I[Iarray]=0;
 	}
 	//generate files for simulated voltage output.
 	FILE *tbout;
@@ -127,7 +141,7 @@ void device_properties(int material){
         printf("Error: gain out can't be opened'\n");
 
     }
-    
+
     char namecounter[] = "eventcounter.txt";
     FILE *counter;
     char countname[strlen(namecounter)+strlen(voltagetb)+1];
@@ -144,12 +158,12 @@ void device_properties(int material){
     double dt,dx;
     Ms=0;
     F=0;
-	gain=0;    
+	gain=0;
 	double globaltime=0;
     int num_electron,num_hole,prescent_carriers, pair;
     /**** BEGIN SIMULATION LOOP TRIALS****/
     for(num=1;num<=Ntrials;num++)
-    {    
+    {
     	 for (Iarray=0;Iarray<CurrentArray;Iarray++){
     		Inum[Iarray]=0;
 		 }
@@ -161,7 +175,7 @@ void device_properties(int material){
          kxy=0;
          kz=0;
          dE=0;
-         Energy=0;         
+         Energy=0;
          z_pos=0;
          drift_t=0;
          time=0;
@@ -175,7 +189,7 @@ void device_properties(int material){
          nssh=0;
          int cut2=0;
          globaltime=timestep;
-         
+
 
 		 /* Device 1-PIN
 		    Device 2-NIP*/
@@ -195,37 +209,37 @@ void device_properties(int material){
 
          /****TRACKS CARRIERS WHILE IN DIODE****/
          while(prescent_carriers>0 && cut2==0)
-         {  /****LOOPS OVER ALL PAIRS ****/  
-		 	for(pair=1;pair<=num_electron;pair++)         
-              {    
+         {  /****LOOPS OVER ALL PAIRS ****/
+		 	for(pair=1;pair<=num_electron;pair++)
+              {
 			  	   int flag=0;
 				   // ELECTRON PROCESS
                    z_pos=electron->Get_pos(pair);
                    time=electron->Get_time(pair);
                    dt=electron->Get_dt(pair);
                    dx=electron->Get_dx(pair);
-                   if(z_pos<0) z_pos=1e-10; // resets a bad trial where the electron drifted out the device the wrong way (extremly rare but causes program to hang) 
-                   
+                   if(z_pos<0) z_pos=1e-10; // resets a bad trial where the electron drifted out the device the wrong way (extremly rare but causes program to hang)
+
                    //If flag stays 0 for all the devices it means that there are no carriers behind globaltime and globaltime can be advanced
-                   //Doing this limits the program to only be simulating the carriers in the same timebin at the same time (Important for calculating instentanious current) 
+                   //Doing this limits the program to only be simulating the carriers in the same timebin at the same time (Important for calculating instentanious current)
                    if(z_pos<diode.Get_width() && time<globaltime)//checks inside field
-                   {    flag++; //used to advance globaltime    
-				   		Energy=electron->Get_Egy(pair);						                   		
+                   {    flag++; //used to advance globaltime
+				   		Energy=electron->Get_Egy(pair);
                         if((electron->Get_scattering(pair)==0))//if not selfscattering scatters in random direction
                         {   electron->scatter(pair,0);
                         }
-                        
+
                             kxy=electron->Get_kxy(pair);
                         	kz=electron->Get_kz(pair);
-                        
+
                         //electron drift process starts
                         //drifts for a random time
-                        double random1;                        
+                        double random1;
                         random1=genrand();
-                        drift_t= -log(random1)/(simulation.Get_rtotal());                       
+                        drift_t= -log(random1)/(simulation.Get_rtotal());
                         time+=drift_t;
                         dt+=drift_t;
-                        
+
                        //updates parameters based on random drift time
                         Efield=diode.Efield_at_x(z_pos);
                         kz+=(constants.Get_q()*drift_t*Efield)/(constants.Get_hbar());
@@ -239,7 +253,7 @@ void device_properties(int material){
                    			cutoff=1;
 					   	}
                         if(dt>=timestep){
-							//calc current  if time since last calculated  >timestep                    	
+							//calc current  if time since last calculated  >timestep
                         	timearray=floor(time/timestep);
                         	int previous;
                         	previous=electron->Get_timearray(pair);
@@ -249,24 +263,24 @@ void device_properties(int material){
                         		I[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
                         		Inum[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
 							}
-                        	electron->Input_timearray(pair,timearray);                        	
+                        	electron->Input_timearray(pair,timearray);
                         	dt=0;
                         	dx=0;
 						}
-						electron->Input_time(pair,time);  
+						electron->Input_time(pair,time);
 						electron->Input_dt(pair,dt);
 						electron->Input_dx(pair,dx);
 
                         //electron drift process ends
-                        
+
                         //update electron position and energy
                        	electron->Input_pos(pair,z_pos);
                         electron->Input_Egy(pair,Energy);
-                        
+
                         //electron scattering
                         if(z_pos<0) z_pos=1e-10;
                         if((z_pos<=diode.Get_width()))
-                        {    //electron scattering process starts                        
+                        {    //electron scattering process starts
                              double random2;
                              int Eint;
                              Eint=floor(Energy*1000.0/constants.Get_q()+0.5);
@@ -277,8 +291,8 @@ void device_properties(int material){
                              else if (Energy == constants.Get_Emax()) random2=simulation.Get_pb(2,constants.Get_NUMPOINTS());
                              else{
                                   random2=genrand();
-							 } 
-                             
+							 }
+
                              if(random2<=simulation.Get_pb(0,Eint)) //phonon absorption
                              {    Energy+=constants.Get_hw();
                                   npha++;
@@ -292,7 +306,7 @@ void device_properties(int material){
                                   electron->Input_scattering(pair,0);
                              }
                              else if(random2<=simulation.Get_pb(2,Eint)) //impact ionization
-                             {    
+                             {
 							      Energy=(Energy-constants.Get_e_Eth())/3.0;
                                   num_electron++;
                                   electron->generation(num_electron,z_pos,Energy,time,0,floor(time/timestep));
@@ -310,15 +324,15 @@ void device_properties(int material){
                                   electron->Input_kz(pair,kz);
                              }
                              //electron scattering process ends
-                                                  
+
                         }
                         else prescent_carriers--;
-                        
+
                         electron->Input_Egy(pair,Energy);
                         if(time>globaltime) flag--;
 
                    }
-                   
+
                    //HOLE PROCESS
                    z_pos=hole->Get_pos(pair);
                    time=hole->Get_time(pair);
@@ -327,19 +341,19 @@ void device_properties(int material){
                    if(z_pos>diode.Get_width()) z_pos=diode.Get_width()-1e-10;
                    if(z_pos>=0 && time<globaltime)
                    {    Energy=hole->Get_Egy(pair);
-				   		flag++;				     				          		
+				   		flag++;
                    	    if((hole->Get_scattering(pair)==0))
                         {    hole->scatter(pair,2);
                         }
-                        
+
                     	kxy=hole->Get_kxy(pair);
                         kz=hole->Get_kz(pair);
-                        
-                        
+
+
                         //Hole drift starts here
-                        double random11;                        
+                        double random11;
                         random11=genrand();
-                        drift_t= -log(random11)/simulation.Get_rtotal2();                      
+                        drift_t= -log(random11)/simulation.Get_rtotal2();
                         time+=drift_t;
                         dt+=drift_t;
                         Efield=diode.Efield_at_x(z_pos);
@@ -352,7 +366,7 @@ void device_properties(int material){
 							z_pos=-10;
 							cutoff=1;
 						}
-                        if(dt>=timestep){                        	
+                        if(dt>=timestep){
                         	timearray=floor(time/timestep);
                         	int previous;
                         	previous=hole->Get_timearray(pair);
@@ -360,7 +374,7 @@ void device_properties(int material){
                         	for(test=(previous+1);test<(timearray+1);test++){
                         		I[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
                         		Inum[test]+=constants.Get_q()*dx/(dt*diode.Get_width());
-							}                    
+							}
                         	dt=0;
                         	dx=0;
                         	hole->Input_timearray(pair,timearray);
@@ -372,8 +386,8 @@ void device_properties(int material){
                         //Hole drift finishes here
                         hole->Input_pos(pair,z_pos);
                         hole->Input_Egy(pair,Energy);
-                        
-                        
+
+
                         if(z_pos>diode.Get_width()) z_pos=diode.Get_width()-1e-10;
                         if(z_pos>=0)
                         {    //Hole scattering starts here
@@ -382,31 +396,31 @@ void device_properties(int material){
                              Eint2=floor(Energy*1000.0/constants.Get_q()+0.5);
                              if (Energy>constants.Get_Emax())
                              {    Eint2=constants.Get_NUMPOINTS();
-                                  random22=simulation.Get_pb2(2,constants.Get_NUMPOINTS());                                  
+                                  random22=simulation.Get_pb2(2,constants.Get_NUMPOINTS());
                              }
                              else if (Energy==constants.Get_Emax())
                              {    random22=simulation.Get_pb2(2,constants.Get_NUMPOINTS());
                              }
-                             else { 
+                             else {
                                   random22=genrand();
 							 }
-                             
+
                              if(random22<=simulation.Get_pb2(0,Eint2)) //phonon absorption
-                             { 
+                             {
 							 	  Energy+=constants.Get_hw();
                                   npha++;
                                   nph++;
                                   hole->Input_scattering(pair,0);
                              }
                              else if(random22<=simulation.Get_pb2(1,Eint2)) //phonon emission
-                             {    
+                             {
 							 	  Energy-=constants.Get_hw();
                                   nphe++;
                                   nph++;
                                   hole->Input_scattering(pair,0);
                              }
                              else if(random22<=simulation.Get_pb2(2,Eint2)) //impact ionization
-                             {   
+                             {
 							 	  Energy=(Energy-constants.Get_h_Eth())/3.0;
                                   num_electron++;
                                   electron->generation(num_electron,z_pos,Energy,time,0,floor(time/timestep));
@@ -418,23 +432,23 @@ void device_properties(int material){
                                   hole->Input_scattering(pair,0);
                              }
                              else if(random22>simulation.Get_pb2(2,Eint2)) //selfscattering
-                             {    
+                             {
 							      nssh++;
                                   hole->Input_scattering(pair,1);
                                   hole->Input_kxy(pair,kxy);
                                   hole->Input_kz(pair,kz);
                              }
                              //hole scattering ends here
-                             
+
                         }
                         else prescent_carriers--;
-                        
+
                         hole->Input_Egy(pair,Energy);
                         if(time>globaltime) flag--;
 
                    }
                    Highest=_max(Highest,pair);
-                   
+
 				   if(flag==0){
 				    globaltime+=timestep;
 					//This is where globaltime is incrimented
@@ -449,49 +463,49 @@ void device_properties(int material){
 		              		if(Inum[Iarray]>BreakdownCurrent){
 		              			scan=1;
 		              			cut2=1;
-							}						
+							}
 							if(Iarray==CurrentArray-1) scan=1;
-						}						
-						if(Inum[Iarray]==0) ++scanlimit;						
-						if(Inum[Iarray]!=0) scanlimit=0;						
-						if(scanlimit>50) scan=1;					  
+						}
+						if(Inum[Iarray]==0) ++scanlimit;
+						if(Inum[Iarray]!=0) scanlimit=0;
+						if(scanlimit>50) scan=1;
 				  }
-				}            
-         }         
-         gain+=tn/Ntrials; //accumilates average gain 
+				}
+         }
+         gain+=tn/Ntrials; //accumilates average gain
          Ms+=(tn*tn/Ntrials); //accumilates average Ms, used to calculate noise
          cumulative+=tn; //tracks average gain so far in simulation
-         double printer=cumulative/num;        
-		
+         double printer=cumulative/num;
+
 		//reset carrier arrays to 0 after trial
        electron->reset();
-	   hole->reset(); 
+	   hole->reset();
 	   //checks for breakdown at end of sim
 	   for (Iarray=0;Iarray<CurrentArray;Iarray++){
 			if(Inum[Iarray] > BreakdownCurrent){
 				breakdown++;
-				fflush(counter);			
+				fflush(counter);
 				int Iprint;
 				double tb = timestep*Iarray;
 				fprintf(tbout,"%d %g\n",num,tb);
-				fflush(tbout);			
+				fflush(tbout);
 				break;
     		}
 		}
-	   
+
 	   //trapezium rule
 	    int arealimitnum=0;
 	    double totalareanum=0;
 	    double area,totalarea,x1,x2,y1,y2;
 	    int i;
 		for(i=0;i<(CurrentArray-1);i++)
-		{				
+		{
 			y1=Inum[i];
 			x1=timestep*i;
 			y2=Inum[i+1];
 			x2=timestep*(i+1);
 			area=y1*(x2-x1)+0.5*(y2-y1)*(x2-x1);
-			totalareanum+=area;			
+			totalareanum+=area;
 		}
 		totalareanum=totalareanum/1.6e-19;
 		fprintf(Mout, "%d %g %g\n",num, totalareanum, tn);
@@ -502,10 +516,10 @@ void device_properties(int material){
          	if(cutoff==1)printf("Completed trial: %d Cutoff Pb=%f  Max array index=%d\n",num,Pbprint,Highest);
          }
     }
-	
+
     F=Ms/(gain*gain);
     Pbreakdown=breakdown/Ntrials;
-    
+
     if(cutoff==0){
     printf("V= %f M= %f, F= %f, Pb= %f \n",Vsim,gain,F,Pbreakdown);
     fprintf(out,"V= %f M= %f F= %f, Pb= %f \n",Vsim,gain,F,Pbreakdown);
@@ -514,7 +528,7 @@ void device_properties(int material){
 		printf("V= %f M= cutoff, F= cutoff, Pb= %f \n",Vsim,Pbreakdown);
     	fprintf(out,"V= %f M= cutoff F= cutoff, Pb= %f \n",Vsim,Pbreakdown);
 	}
-    fflush(out);  
+    fflush(out);
 	fclose(tbout);
 	if(breakdown==0){
 	FILE *Iout;
@@ -529,7 +543,7 @@ void device_properties(int material){
     }
     fprintf(Iout,"V= %f \n", Vsim);
     fprintf(Iout,"time step size in %e s\n",timestep);
-    fprintf(Iout,"t                I \n");   
+    fprintf(Iout,"t                I \n");
     int Ioutprint =0;
 	int i;
     for(i=0;i<CurrentArray;i++)
@@ -543,7 +557,7 @@ void device_properties(int material){
 		else if(Ioutprint <50){
 			fprintf(Iout,"%g %g \n",timeprint,current);
 			Ioutprint++;
-		}		
+		}
 	}
 	fflush(Iout);
 	fclose(Iout);
