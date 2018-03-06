@@ -30,10 +30,10 @@ Jonathan Petticrew, University of Sheffield, 2017.
 
 class device{
       private:
-          SMC *constants; 
-		  int NumLayers;                  
-          double Vbi;         
-          double width;        
+          SMC *constants;
+		  int NumLayers;
+          double Vbi;
+          double width;
           double *efield_x;
           double *efield_e;
           double *N;
@@ -43,18 +43,14 @@ class device{
           double *Nwe;
           double *Nw2e;
           double *Vtcheck;
-          int i_max;          
+          int i_max;
           int jcheck;
           double die;
           double q;
           double LinearInterpolate(double y1, double y2, double x1, double x2, double x);
-          double vtr(int b);
-	      double Wr(double var[], int a, int b);
-		  double bmid(int a, int b);
-		  double cmid(int k);
 		  void read();
       public:
-          device(SMC *con);         
+          device(SMC *con);
           double Efield_at_x(double xpos);//returns the Efield for a given position
           double Get_width();
           void profiler(double voltage);

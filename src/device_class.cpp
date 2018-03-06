@@ -31,8 +31,8 @@ Jonathan Petticrew, University of Sheffield, 2017.
 //Constructor, sets a few variables and calls read() to read in and populate the doping profile.
 //PUBLIC
 device::device(SMC *input):constants(input){
-    q=constants->Get_q();    
-    Vbi=constants->Get_Vbi();    
+    q=constants->Get_q();
+    Vbi=constants->Get_Vbi();
     jcheck=0;
 	int d1=constants->Get_die();
 	die=d1*8.85e-12;
@@ -44,21 +44,21 @@ device::device(SMC *input):constants(input){
 //PUBLIC
 double device::Efield_at_x(double xpos){
     double Field;
-       
+
     int i,j;
     for(i=0;i<(i_max);i++)
     {
 		if (xpos>=efield_x[i])
-		{   
+		{
 			j=i+1;
 			if(xpos<efield_x[j])
-			{   
+			{
 						Field = LinearInterpolate(efield_e[i], efield_e[j], efield_x[i],efield_x[j],xpos);
 						return Field;
 			}
-		}				
+		}
 	}
-	return 0;   
+	return 0;
 };
 //Get function to return the depletion width.
 //PUBLIC
@@ -73,56 +73,7 @@ double device::LinearInterpolate(double y1, double y2, double x1, double x2, dou
 	return ans;
 };
 
-//vtr is used as part of the electric field calculation for the N_layer solver
-//used to calculate check voltages
-//PRIVATE
-double device::vtr(int b){
-	double ans=0;
-	ans=0.5*w[b+1]*Gw[b+1]+0.5*w[b]*(Gw[b+1]+Wr(Gw,b,b+1))+0.5*(Wr(Gw,1,b+1)*Wr(Gw,1,b+1))/G[0];
-	if (b>1){
-		int n;
-		for(n=2;n<b+1;n++){
-			ans+=0.5*w[n-1]*(Wr(Gw,n,b+1)+Wr(Gw,n-1,b+1));
-		}
-	}
-	
-	return ans;
-};
-//Wr is used as part of the electric field calculation for the N_layer solver
-//sums var between a and b
-//PRIVATE
-double device::Wr(double var[], int a, int b){
-	double ans=0;
-	int i;
-	for(i=a;i<(b+1);i++){
-		ans+=var[i];
-	}
-	return ans;
-};
-//bmid is used as part of the electric field calculation for the N_Layer solver
-//returns part of the quadratic eqn
-//PRIVATE
-double device::bmid(int a, int b){
-	double ans=0;
-	int i;
-	for (i=a;i<(b+1);i++){
-		ans+=w[i]-(Nwe[i]/(N[0]/die));
-	}
-	return ans;
-};
-//cmid is used as part of the electric field calculation for the N_Layer solver
-//returns part of the quadratic eqn
-//PRIVATE
-double device::cmid(int k){
-	double ans =0;
-	int i;
-	if(k>1){
-		for(i=2;i<(k+1);i++){
-			ans+=2*Nwe[i]*Wr(w,1,i-1);
-		}
-	}
-	return ans;
-};
+
 //read, populates the doping profile, declares the size of arrays that depend on the doping profile
 //Shifts the doping profile read in as cm-3, um to m-3, m and populates the check voltages.
 //The check voltages are the points that the device fully depetes regions, i.e. 0 is 2 regions, 1 is 3 regions etc.
@@ -134,7 +85,7 @@ void device::read(){
 	if ((doping=fopen("doping_profile.txt","r"))==NULL){
 		printf("Error: Can't open doping profile\n");
 		printf("Press space to exit\n");
-        while((inputkey=_getch())==0); 
+        while((inputkey=_getch())==0);
 	}
 	double f,g;
 	while(fscanf(doping,"%lf,%lf\n",&f,&g)>0){
@@ -166,12 +117,12 @@ void device::read(){
 	Nw2e=new double[NumLayers];
 	for(i=0;i<NumLayers;i++){
 		G[i]=q*N[i]/die;
-		G[0]=fabs(G[0]);		
+		G[0]=fabs(G[0]);
 		Gw[i]=G[i]*w[i];
 		Nwe[i]=N[i]*w[i]/die;
 		Nw2e[i]=N[i]*w[i]*w[i]/die;
 	}
-	
+
 	Vtcheck=new double[NumLayers-1];
 	Vtcheck[0]=0.5*(w[1]+Gw[1]/G[0])*Gw[1];
 	for(i=1;i<NumLayers-1;i++){
@@ -189,63 +140,4 @@ void device::profiler(double voltagein){
 		efield_x[i]=0;
 		efield_e[i]=0;
 	}
-	double a,b,c,xlayer;
-	if(voltage<Vtcheck[0] || NumLayers==2){
-		//Two Layers
-		numlayers=2;
-		efield_x[0]=sqrt(2*voltage/(G[0]*(1+G[0]/G[1])));
-		efield_x[1]=G[0]/G[1]*efield_x[0];
-		efield_e[1]=G[0]*efield_x[0];
-		efield_x[2]=efield_x[0]+efield_x[1];
-		
-	}
-	else{
-		//More than two layers
-		for(i=1;i<(NumLayers-1);i++){
-			if(voltage<Vtcheck[i] || NumLayers==i+2){
-				numlayers=i+2;
-				int k=i+2-1;//+2 converts to NumLayers depleted -1 to acount for change of base Matlab to C
-				a=N[k]/die*(1-(N[k]/die)/(N[0]/die));
-				b=2*N[k]/die*bmid(1, k-1);
-				c=-(Wr(Nwe,1,k-1)*Wr(Nwe,1,k-1))/(N[0]/die)+(Wr(Nw2e,1,k-1))+cmid(k-1)-2*voltage/q;
-				xlayer=(-b+sqrt(b*b-4*a*c))/(2*a);
-				efield_x[0]=-(N[k]*xlayer/die+Wr(Nwe,1,k-1))/(N[0]/die);
-				int j;
-				for (j=0;j<k-1;j++){
-					efield_e[j+1]=xlayer*G[k]+Wr(Gw,j+1,k-1);
-				}
-				efield_e[k]=xlayer*G[k];
-				//xm=xlayer+Wr(w,1,k-1)+x[0];
-				efield_x[2]=w[1];
-				for (j=3;j<k+1;j++){
-					efield_x[j]=Wr(w,1,j-1);
-				}
-				efield_x[k+1]=Wr(w,1,k-1)+xlayer;
-				break;
-			}
-		}
-	}
-	efield_x[0]=-efield_x[0];
-	double temp_efield_x[numlayers+1]={0};
-	double temp_efield_e[numlayers+1]={0};
-	i_max=numlayers;
-	for(i=0;i<(numlayers+1);i++){
-		temp_efield_x[i]=efield_x[numlayers-i];
-		temp_efield_e[i]=efield_e[numlayers-i];
-	}
-
-	efield_x[0]=0;
-	double temp;
-	for(i=1;i<(numlayers+1);i++){
-		temp=fabs(temp_efield_x[i-1]-temp_efield_x[i]);
-		efield_x[i]=temp+efield_x[i-1];
-	}
-	
-	for(i=0;i<(numlayers+1);i++){
-		efield_e[i]=temp_efield_e[i];
-	}
-
-	width=efield_x[numlayers];
-	//printf("%g\n",width);
 };
-
