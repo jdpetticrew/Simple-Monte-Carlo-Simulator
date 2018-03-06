@@ -33,10 +33,9 @@ Jonathan Petticrew, University of Sheffield, 2017.
 device::device(SMC *input):constants(input){
     q=constants->Get_q();
     Vbi=constants->Get_Vbi();
-    jcheck=0;
-	int d1=constants->Get_die();
-	die=d1*8.85e-12;
-	read();
+	  int d1=constants->Get_die();
+	  die=d1*8.85e-12;
+	  read();
 };
 
 //Efield_at_x returns the electric field to main for a given xposition inside
@@ -46,7 +45,7 @@ double device::Efield_at_x(double xpos){
     double Field;
 
     int i,j;
-    for(i=0;i<(i_max);i++)
+    for(i=i_min;i<i_max;i++)
     {
 		if (xpos>=efield_x[i])
 		{
@@ -62,7 +61,11 @@ double device::Efield_at_x(double xpos){
 };
 //Get function to return the depletion width.
 //PUBLIC
-double device::Get_width(){return width;
+double device::Get_width(){return efield_x[i_max]-efield_x[i_min];
+};
+double device::Get_xmin(){return efield_x[i_min];
+};
+double device::Get_xmax(){return efield_x[i_max];
 };
 //Linear Interpolator used by Efield_at_x
 //PRIVATE
@@ -109,24 +112,7 @@ void device::read(){
 	fclose(doping);
 	for(z=0;z<NumLayers;z++){
 	    N[z]=N[z]*1e6;
-		w[z]=w[z]*1e-6;
-	}
-	G=new double[NumLayers];
-	Gw=new double[NumLayers];
-	Nwe=new double[NumLayers];
-	Nw2e=new double[NumLayers];
-	for(i=0;i<NumLayers;i++){
-		G[i]=q*N[i]/die;
-		G[0]=fabs(G[0]);
-		Gw[i]=G[i]*w[i];
-		Nwe[i]=N[i]*w[i]/die;
-		Nw2e[i]=N[i]*w[i]*w[i]/die;
-	}
-
-	Vtcheck=new double[NumLayers-1];
-	Vtcheck[0]=0.5*(w[1]+Gw[1]/G[0])*Gw[1];
-	for(i=1;i<NumLayers-1;i++){
-		Vtcheck[i]=vtr(i);
+		  w[z]=w[z]*1e-6;
 	}
 };
 //profiler is the N_Layer electric field solver. Calculates field for voltagein as a
@@ -135,9 +121,163 @@ void device::read(){
 void device::profiler(double voltagein){
 	double voltage;
 	voltage=voltagein+Vbi;
-	int i,numlayers;
-	for(i=0;i<(NumLayers+1);i++){
-		efield_x[i]=0;
-		efield_e[i]=0;
-	}
+	int i,j;
+  int pn=depletionlookup()+1;
+  double Vsum=0;
+  int err=0;
+  double xold=0;
+  double xoldest=0;
+  int endpoint,depleted;
+  while (Vsum<voltage) {
+      if (err==0) {
+        if (pn>0) {
+          pn=pn-1;
+        }
+        else {
+          printf("ERROR, stepped back outside 1st region\n");
+        }
+      }
+      for(i=0;i<(NumLayers+1);i++){
+        efield_x[i]=0;
+        efield_e[i]=0;
+      }
+      if (err==0) {
+        efield_x[pn+1]=w[pn];
+      } else {
+        efield_x[pn+1]=xold;
+      }
+      efield_e[pn+1]=efield_x[pn+1]*q*N[pn]/die;
+      j=pn+1;
+      depleted=0;
+      err=0;
+      double ereg;
+      while (depleted==0 && err==0) {
+        ereg=efield_e[j]+q*N[j]*w[j]/die;
+        if (ereg*efield_e[j]>0) {
+          efield_e[j+1]=ereg;
+          efield_x[j+1]=efield_x[j]+w[j];
+          j++;
+          if (j>NumLayers-1) {
+            err=1;
+            xold=efield_x[pn+1]/2;
+          }
+        }
+        else{
+          efield_e[j+1]=0;
+          efield_x[j+1]=efield_x[j]+fabs((0-efield_e[j])/((efield_e[j]-ereg)/w[j]));
+          depleted=1;
+        }
+      }
+
+      if (err==0) {
+        Vsum=0;
+        for(i=0;i<NumLayers;i++){
+          Vsum=Vsum+0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]);
+          Vsum=fabs(Vsum);
+          //printf("%g\n",Vsum);
+        }
+      }
+      else{
+        Vsum=0;
+      }
+  }
+  int solve=0;
+  int firstloop=0;
+  double xtest=efield_x[pn+1];
+  while (solve==0) {
+    if (Vsum>voltage) {
+      if (firstloop==0) {
+        xold=xtest;
+        xtest=xtest/2;
+        firstloop=1;
+      } else {
+        xoldest=xold;
+        xold=xtest;
+        xtest=xold-fabs(xoldest-xold)/2;
+      }
+    } else {
+      if (firstloop==0) {
+        xold=xtest;
+        xtest=3*xtest/2;
+        firstloop=1;
+      } else {
+        xoldest=xold;
+        xold=xtest;
+        xtest=xold+fabs(xoldest-xold)/2;
+      }
+    }
+    for(i=0;i<(NumLayers+1);i++){
+      efield_x[i]=0;
+      efield_e[i]=0;
+    }
+    efield_x[pn+1]=xtest;
+    efield_e[pn+1]=efield_x[pn+1]*q*N[pn]/die;
+    int j=pn+1;
+    depleted=0;
+    while (depleted==0) {
+      double ereg=efield_e[j]+q*N[j]*w[j]/die;
+      if (ereg*efield_e[j]>0) {
+        efield_e[j+1]=ereg;
+        efield_x[j+1]=efield_x[j]+w[j];
+        j++;
+        if (j>NumLayers) {
+            printf("Error in field solver\n");
+        }
+      }
+      else{
+        efield_e[j+1]=0;
+        efield_x[j+1]=efield_x[j]+fabs((0-efield_e[j])/((efield_e[j]-ereg)/w[j]));
+        depleted=1;
+        endpoint=j+1;
+      }
+    }
+    Vsum=0;
+    for(i=0;i<NumLayers;i++){
+      Vsum=Vsum+0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]);
+      Vsum=fabs(Vsum);
+      //printf("%g\n",Vsum);
+    }
+    if (fabs(Vsum-voltage)<0.0001) {
+      solve=1;
+      //printf("I Solve\n");
+    }
+  }
+
+  efield_x[pn]=0-efield_x[pn+1];
+  for(i=pn+1;i<NumLayers+1;i++){
+    efield_x[i]=efield_x[i]+efield_x[pn];
+  }
+  for(i=0;i<pn+1;i++){
+    for(j=0;j<NumLayers+1;j++){
+      efield_x[j]=efield_x[j]+w[i];
+    }
+  }
+  for(i=pn-1;i>-1;i--){
+    efield_x[i]=efield_x[pn];
+  }
+  for(i=endpoint+1;i<NumLayers+1;i++){
+    efield_x[i]=efield_x[endpoint];
+  }
+  i_min=pn;
+  i_max=endpoint;
+  FILE *efield;
+  /*efield=fopen("e_out.txt","w");
+  for(i=0;i<NumLayers+1;i++){
+    fprintf(efield, "%g %g\n",efield_x[i],efield_e[i]);
+  }*/
+
+};
+//depletionlookup finds the pn junction
+int device::depletionlookup(){
+  int i;
+  for(i=0;i<(NumLayers-1);i++){
+    int x;
+    x=N[i]*N[i+1];
+    if(x<=0){
+      FILE *h;
+      h=fopen("dep.txt","w");
+      fprintf(h,"%d\n",i);
+      return i;
+    }
+  }
 };

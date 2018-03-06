@@ -195,13 +195,13 @@ void device_properties(int material){
 		    Device 2-NIP*/
 
          if (usDevice==1){
-            electron->Input_pos(1,1e-10);
+            electron->Input_pos(1,diode.Get_xmin()+1e-10);
             hole->Input_pos(1,-1);
             prescent_carriers=1;
          }
          if (usDevice==2){
-             electron->Input_pos(1,(diode.Get_width()+1e-10));
-             hole->Input_pos(1,(diode.Get_width()-1e-10));
+             electron->Input_pos(1,(diode.Get_xmax()+1e-10));
+             hole->Input_pos(1,(diode.Get_xmax()-1e-10));
              prescent_carriers=1;
          }
 		//carrierlimit is a threshold to end the simulation early
@@ -218,11 +218,11 @@ void device_properties(int material){
                    time=electron->Get_time(pair);
                    dt=electron->Get_dt(pair);
                    dx=electron->Get_dx(pair);
-                   if(z_pos<0) z_pos=1e-10; // resets a bad trial where the electron drifted out the device the wrong way (extremly rare but causes program to hang)
+                   if(z_pos<diode.Get_xmin()) z_pos=diode.Get_xmin()+1e-10; // resets a bad trial where the electron drifted out the device the wrong way (extremly rare but causes program to hang)
 
                    //If flag stays 0 for all the devices it means that there are no carriers behind globaltime and globaltime can be advanced
                    //Doing this limits the program to only be simulating the carriers in the same timebin at the same time (Important for calculating instentanious current)
-                   if(z_pos<diode.Get_width() && time<globaltime)//checks inside field
+                   if(z_pos<diode.Get_xmax() && time<globaltime)//checks inside field
                    {    flag++; //used to advance globaltime
 				   		Energy=electron->Get_Egy(pair);
                         if((electron->Get_scattering(pair)==0))//if not selfscattering scatters in random direction
@@ -249,7 +249,7 @@ void device_properties(int material){
                         dx+=dE/(constants.Get_q()*Efield);
                         if(time>cutofftime){
                         	//cuts off electron and removes it from device if user spec. timelimit exceeded
-                   			z_pos=diode.Get_width()+10;
+                   			z_pos=diode.Get_xmax()+10;
                    			cutoff=1;
 					   	}
                         if(dt>=timestep){
@@ -279,7 +279,7 @@ void device_properties(int material){
 
                         //electron scattering
                         if(z_pos<0) z_pos=1e-10;
-                        if((z_pos<=diode.Get_width()))
+                        if((z_pos<=diode.Get_xmax()))
                         {    //electron scattering process starts
                              double random2;
                              int Eint;
@@ -338,8 +338,8 @@ void device_properties(int material){
                    time=hole->Get_time(pair);
                    dt=hole->Get_dt(pair);
                    dx=hole->Get_dx(pair);
-                   if(z_pos>diode.Get_width()) z_pos=diode.Get_width()-1e-10;
-                   if(z_pos>=0 && time<globaltime)
+                   if(z_pos>diode.Get_xmax()) z_pos=diode.Get_xmax()-1e-10;
+                   if(z_pos>=diode.Get_xmin() && time<globaltime)
                    {    Energy=hole->Get_Egy(pair);
 				   		flag++;
                    	    if((hole->Get_scattering(pair)==0))
@@ -363,7 +363,7 @@ void device_properties(int material){
                         z_pos-=dE/(Efield*constants.Get_q());
                         dx+=dE/(Efield*constants.Get_q());
                         if(time>cutofftime){
-							z_pos=-10;
+							z_pos=diode.Get_xmin()-10;
 							cutoff=1;
 						}
                         if(dt>=timestep){
@@ -388,8 +388,8 @@ void device_properties(int material){
                         hole->Input_Egy(pair,Energy);
 
 
-                        if(z_pos>diode.Get_width()) z_pos=diode.Get_width()-1e-10;
-                        if(z_pos>=0)
+                        if(z_pos>diode.Get_xmax()) z_pos=diode.Get_xmax()-1e-10;
+                        if(z_pos>=diode.Get_xmin())
                         {    //Hole scattering starts here
                              double random22;
                              int Eint2;

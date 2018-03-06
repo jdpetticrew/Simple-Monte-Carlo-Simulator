@@ -31,28 +31,26 @@ Jonathan Petticrew, University of Sheffield, 2017.
 class device{
       private:
           SMC *constants;
-		  int NumLayers;
+		      int NumLayers;
           double Vbi;
           double width;
           double *efield_x;
           double *efield_e;
           double *N;
           double *w;
-          double *G;
-          double *Gw;
-          double *Nwe;
-          double *Nw2e;
-          double *Vtcheck;
           int i_max;
-          int jcheck;
+          int i_min;
           double die;
           double q;
           double LinearInterpolate(double y1, double y2, double x1, double x2, double x);
-		  void read();
+		      void read();
+          int depletionlookup();
       public:
           device(SMC *con);
           double Efield_at_x(double xpos);//returns the Efield for a given position
           double Get_width();
+          double Get_xmin();
+          double Get_xmax();
           void profiler(double voltage);
 };
 #endif
