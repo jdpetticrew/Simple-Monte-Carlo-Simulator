@@ -1,26 +1,26 @@
 /* Copyright 2017 Advanced Detector Centre, Department of Electronic and
-Electrical Engineering, University of Sheffield, UK.
+   Electrical Engineering, University of Sheffield, UK.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.*/
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.*/
 
 /*
-dev_prop_func.h contains the function prototypes for functions that are uniqe to the device_properties mode
-in device_properties.cpp
+   dev_prop_func.h contains the function prototypes for functions that are uniqe to the device_properties mode
+   in device_properties.cpp
 
-functions are implimented in dev_prop_func.cpp
+   functions are implimented in dev_prop_func.cpp
 
-Jonathan Petticrew, University of Sheffield, 2017.
-*/
+   Jonathan Petticrew, University of Sheffield, 2017.
+ */
 
 #ifndef DEV_PROP_FUNC_H
 #define DEV_PROP_FUNC_H
