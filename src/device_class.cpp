@@ -33,7 +33,7 @@
 device::device(SMC *input) : constants(input){
 	q=constants->Get_q();
 	Vbi=constants->Get_Vbi();
-	int d1=constants->Get_die();
+	double d1=constants->Get_die();
 	die=d1*8.85e-12;
 	read();
 };
@@ -131,6 +131,7 @@ void device::profiler(double voltagein){
 	double xold=0;
 	double xoldest=0;
 	int endpoint,depleted;
+	double ereg;
 	while (Vsum<voltage) {
 		if (err==0) {
 			if (pn>0) {
@@ -153,7 +154,6 @@ void device::profiler(double voltagein){
 		j=pn+1;
 		depleted=0;
 		err=0;
-		double ereg;
 		while (depleted==0 && err==0) {
 			ereg=efield_e[j]+q*N[j]*w[j]/die;
 			if (ereg*efield_e[j]>0) {
@@ -175,8 +175,8 @@ void device::profiler(double voltagein){
 		if (err==0) {
 			Vsum=0;
 			for(i=0; i<NumLayers; i++) {
-				Vsum=Vsum+0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]);
-				Vsum=fabs(Vsum);
+				Vsum=Vsum+fabs(0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]));
+				//Vsum=fabs(Vsum);
 				//printf("%g\n",Vsum);
 			}
 		}
@@ -188,37 +188,37 @@ void device::profiler(double voltagein){
 	int firstloop=0;
 	double xtest=efield_x[pn+1];
 	while (solve==0) {
-		if (Vsum>voltage) {
-			if (firstloop==0) {
-				xold=xtest;
-				xtest=xtest/2;
-				firstloop=1;
-			} else {
-				xoldest=xold;
-				xold=xtest;
-				xtest=xold-fabs(xoldest-xold)/2;
-			}
-		} else {
-			if (firstloop==0) {
-				xold=xtest;
-				xtest=3*xtest/2;
-				firstloop=1;
-			} else {
-				xoldest=xold;
-				xold=xtest;
-				xtest=xold+fabs(xoldest-xold)/2;
-			}
-		}
 		for(i=0; i<(NumLayers+1); i++) {
 			efield_x[i]=0;
 			efield_e[i]=0;
 		}
+		if (Vsum>voltage) {
+			if (firstloop==0) {
+				xold=xtest;
+				xtest=xtest/2.0;
+				firstloop=1;
+			} else {
+				xoldest=xold;
+				xold=xtest;
+				xtest=xold-fabs((xoldest-xold)/2);
+			}
+		} else {
+			if (firstloop==0) {
+				xold=xtest;
+				xtest=3*xtest/2.0;
+				firstloop=1;
+			} else {
+				xoldest=xold;
+				xold=xtest;
+				xtest=xold+fabs((xoldest-xold)/2);
+			}
+		}
 		efield_x[pn+1]=xtest;
-		efield_e[pn+1]=efield_x[pn+1]*q*N[pn]/die;
+		efield_e[pn+1]=xtest*q*N[pn]/die;
 		int j=pn+1;
 		depleted=0;
 		while (depleted==0) {
-			double ereg=efield_e[j]+q*N[j]*w[j]/die;
+			ereg=efield_e[j]+q*N[j]*w[j]/die;
 			if (ereg*efield_e[j]>0) {
 				efield_e[j+1]=ereg;
 				efield_x[j+1]=efield_x[j]+w[j];
@@ -236,11 +236,10 @@ void device::profiler(double voltagein){
 		}
 		Vsum=0;
 		for(i=0; i<NumLayers; i++) {
-			Vsum=Vsum+0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]);
-			Vsum=fabs(Vsum);
-			//printf("%g\n",Vsum);
+			Vsum=Vsum+fabs(0.5*(efield_x[i+1]-efield_x[i])*(efield_e[i]+efield_e[i+1]));
+			//Vsum=fabs(Vsum);
 		}
-		if (fabs(Vsum-voltage)<0.0001) {
+		if (fabs(Vsum-voltage)<0.00001) {
 			solve=1;
 			//printf("I Solve\n");
 		}
@@ -264,10 +263,6 @@ void device::profiler(double voltagein){
 	i_min=pn;
 	i_max=endpoint;
 	FILE *efield;
-	/*efield=fopen("e_out.txt","w");
-	   for(i=0;i<NumLayers+1;i++){
-	   fprintf(efield, "%g %g\n",efield_x[i],efield_e[i]);
-	   }*/
 
 };
 //depletionlookup finds the pn junction
@@ -277,9 +272,6 @@ int device::depletionlookup(){
 		int x;
 		x=N[i]*N[i+1];
 		if(x<=0) {
-			FILE *h;
-			h=fopen("dep.txt","w");
-			fprintf(h,"%d\n",i);
 			return i;
 		}
 	}

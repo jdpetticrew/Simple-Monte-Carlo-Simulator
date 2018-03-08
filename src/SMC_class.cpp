@@ -125,7 +125,7 @@ void SMC::mat(int x){
 		hw=(0.063*q);
 		MAX_eV=6;
 		Vbi=1;
-		die=11.9;
+		die=11.90;
 	}
 	else if (x == 2) {//GaAd
 		e_mass=(0.5*free_mass);
