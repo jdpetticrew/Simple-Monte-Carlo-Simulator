@@ -94,13 +94,13 @@ void postprocess(double Vsim[],double simtime, int voltages){
 		char fileM[strlen(voltagetb)+strlen(nameM)+1];
 		snprintf(fileM,sizeof(fileM),"%s%s",voltagetb,nameM);
 		Mout=fopen(fileM,"r");
-		int event, count;
+		int event, count, count2;
 		double scanned, TGain, Gain2,mgain2;
 		TGain=0;
 		Gain2=0;
 		count=0;
-		while((fscanf(Mout,"%d %lf\n",&event, &scanned))>0) {
-			scanned=scanned/1.6e-19;
+		while((fscanf(Mout,"%d %lf %d\n",&event, &scanned, &count2))>0) {
+			//scanned=scanned/1.6e-19;
 			TGain+=scanned;
 			Gain2+=scanned*scanned;
 			count++;
@@ -135,7 +135,7 @@ void postprocess(double Vsim[],double simtime, int voltages){
 				snprintf(fileH,sizeof(fileH),"%s%s",voltagetb,nameH);
 				histogram hist(data,count,0.1,fileH);
 				T[i]=hist.Get_Mean();
-				fprintf(results,"%lf %lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i]);
+				fprintf(results,"%lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i]);
 			}
 			else{
 				fclose(Tout);
