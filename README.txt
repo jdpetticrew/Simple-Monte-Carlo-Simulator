@@ -48,6 +48,12 @@ File Structure
 	Contains examples of input files required for diode properties mode.
 -Build
 	Contains a compiled exe for each tagged version.
+	
+----------------------
+Support/Issues
+----------------------
+
+If you encounter any issues with the Simple Monte Carlo Simulator please post an issue on the GitHub repository.
 
 ----------------------
 Citations
