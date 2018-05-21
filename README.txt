@@ -62,8 +62,8 @@ Citations
 Please use the citation below if you use the Simple Monte Carlo Simulator, please aslo use the citation for
 the corresponding material parameter set(s).
 
-Petticrew, J.D., Dimler, S.J. & Ng, J.S., (2018). Simple Monte Carlo Simulator for Modelling Linear Mode and
-Geiger Mode Avalanche Photodiodes in C++ . Journal of Open Research Software . 6 ( 1 ) , p . 17 . 
+Petticrew, J.D., Dimler, S.J. & Ng, J.S., (2018). Simple Monte Carlo Simulator for Modelling Linear Mode
+and Geiger Mode Avalanche Photodiodes in C++ . Journal of Open Research Software . 6 ( 1 ) , p . 17 . 
 DOI: http://doi.org/10.5334/jors.212
 
 
