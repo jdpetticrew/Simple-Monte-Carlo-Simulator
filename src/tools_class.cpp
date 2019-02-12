@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,7 @@ int tools::scattering_probability(){ //calculates the scattering probabilities c
 	FILE *fp_rate, *fp_pb;
 	bool ratefail=false;
 	bool pbfail=false;
-	unsigned int j,inputkey=0,GoAhead=1;
+	int j,inputkey=0,GoAhead=1;
 	e_rate();
 	h_rate();
 	int x = constants->Get_NUMPOINTS();
@@ -50,35 +50,35 @@ int tools::scattering_probability(){ //calculates the scattering probabilities c
 
 	if ((fp_rate=fopen("scattering_rates.txt","w"))==NULL)
 	{    printf("Cannot oen file \"scattering_rates.txt\"\n");
-	     ratefail=true;}
+		 ratefail=true;}
 	if ((fp_pb=fopen("scattering_pb.txt","w"))==NULL)
 	{    printf("Cannot oen file \"scattering_pb.txt\"\n");
-	     pbfail=true;}
+		 pbfail=true;}
 	if(ratefail||pbfail)
 	{    printf("Output files could not be opened. Would you like to continue (y/n)\n");
-	     do
-	     {inputkey=_getch();}
-	     while(inputkey!='y' && inputkey!='Y' && inputkey!='n' && inputkey!='N');
-	     if (inputkey=='y' || inputkey=='Y')
-		     GoAhead=2;
-	     else GoAhead=0; }
+		 do
+		 {inputkey=_getch();}
+		 while(inputkey!='y' && inputkey!='Y' && inputkey!='n' && inputkey!='N');
+		 if (inputkey=='y' || inputkey=='Y')
+			 GoAhead=2;
+		 else GoAhead=0; }
 	/****CHANGES THE RATES INTO PROBABILITIES****/
 	if (GoAhead)
 	{    for(j=0; j<=x; j++)
-	     {
-		     if(!ratefail)
-			     fprintf(fp_rate,"%f, %e, %e, %e, %e, %e, %e\n",j*0.001,pb[0][j],pb[1][j],pb[2][j],pb2[0][j],pb2[1][j],pb2[2][j]);
-		     pb[0][j]= pb[0][j]/rtotal;
-		     pb[1][j]=pb[0][j]+pb[1][j]/rtotal;
-		     pb[2][j]=pb[1][j]+pb[2][j]/rtotal;
-		     pb2[0][j]= pb2[0][j]/rtotal2;
-		     pb2[1][j]=pb2[0][j]+pb2[1][j]/rtotal2;
-		     pb2[2][j]=pb2[1][j]+pb2[2][j]/rtotal2;
-		     if(!pbfail)
-			     fprintf(fp_pb,"j=%d, %e, %e, %e, %e, %e, %e\n",j,pb[0][j],pb[1][j],pb[2][j],pb2[0][j],pb2[1][j],pb2[2][j]);
-	     }}
+		 {
+			 if(!ratefail)
+				 fprintf(fp_rate,"%f, %e, %e, %e, %e, %e, %e\n",j*0.001,pb[0][j],pb[1][j],pb[2][j],pb2[0][j],pb2[1][j],pb2[2][j]);
+			 pb[0][j]= pb[0][j]/rtotal;
+			 pb[1][j]=pb[0][j]+pb[1][j]/rtotal;
+			 pb[2][j]=pb[1][j]+pb[2][j]/rtotal;
+			 pb2[0][j]= pb2[0][j]/rtotal2;
+			 pb2[1][j]=pb2[0][j]+pb2[1][j]/rtotal2;
+			 pb2[2][j]=pb2[1][j]+pb2[2][j]/rtotal2;
+			 if(!pbfail)
+				 fprintf(fp_pb,"j=%d, %e, %e, %e, %e, %e, %e\n",j,pb[0][j],pb[1][j],pb[2][j],pb2[0][j],pb2[1][j],pb2[2][j]);
+		 }}
 	if(!ratefail) fclose(fp_rate);
-	if(!pbfail) !fclose(fp_pb);
+	if(!pbfail) fclose(fp_pb);
 	return(GoAhead);
 	// returns 0 for no output and user wants to quit
 	//returns 1 if everything ok
@@ -87,7 +87,7 @@ int tools::scattering_probability(){ //calculates the scattering probabilities c
 
 //calculates the electron scattering rates
 void tools::e_rate(){
-	unsigned int i;
+	int i;
 	double n;
 	double Egap;
 	double x,x1;
@@ -98,23 +98,23 @@ void tools::e_rate(){
 
 	for (i=0; i<=j; i++)
 	{    n=i*constants->Get_q()*0.001;
-	     Egap=(n-constants->Get_e_Eth())/(constants->Get_e_Eth());
-	     pb[0][i]=e_para*sqrt((2*(n+constants->Get_hw()))/constants->Get_e_mass());//rate of phonon absorption
+		 Egap=(n-constants->Get_e_Eth())/(constants->Get_e_Eth());
+		 pb[0][i]=e_para*sqrt((2*(n+constants->Get_hw()))/constants->Get_e_mass());//rate of phonon absorption
 
-	     if (n>constants->Get_hw())
-		     pb[1][i]=e_para2*sqrt((2*(n-constants->Get_hw()))/constants->Get_e_mass()); //rate of phonon emission
-	     else pb[1][i]=0;
+		 if (n>constants->Get_hw())
+			 pb[1][i]=e_para2*sqrt((2*(n-constants->Get_hw()))/constants->Get_e_mass()); //rate of phonon emission
+		 else pb[1][i]=0;
 
-	     if (Egap>0)
-	     { x=my_pow(Egap,constants->Get_e_gamma());
-	       x1=constants->Get_e_Cii();
-	       pb[2][i]=x*constants->Get_e_Cii();         //rate of impact ionization
-	     }
-	     else pb[2][i]=0; }
+		 if (Egap>0)
+		 { x=my_pow(Egap,constants->Get_e_gamma());
+		   x1=constants->Get_e_Cii();
+		   pb[2][i]=x*constants->Get_e_Cii();         //rate of impact ionization
+		 }
+		 else pb[2][i]=0; }
 };
 //calculates the hole scattering rates
 void tools::h_rate(){
-	unsigned int i;
+	int i;
 	double n;
 	double Egap;
 	double h_para, h_para2;
@@ -124,19 +124,19 @@ void tools::h_rate(){
 	int x=constants->Get_NUMPOINTS();
 	for (i=0; i<=x; i++)
 	{    n=i*constants->Get_q()*0.001;
-	     Egap=(n-constants->Get_h_Eth())/(constants->Get_h_Eth());
-	     pb2[0][i]=h_para*sqrt((2*(n+constants->Get_hw()))/constants->Get_h_mass());//rate of phonon absorption
+		 Egap=(n-constants->Get_h_Eth())/(constants->Get_h_Eth());
+		 pb2[0][i]=h_para*sqrt((2*(n+constants->Get_hw()))/constants->Get_h_mass());//rate of phonon absorption
 
-	     if (n>constants->Get_hw())
-		     pb2[1][i]=h_para2*sqrt((2*(n-constants->Get_hw()))/constants->Get_h_mass()); //rate of phonon emission
-	     else pb2[1][i]=0;
+		 if (n>constants->Get_hw())
+			 pb2[1][i]=h_para2*sqrt((2*(n-constants->Get_hw()))/constants->Get_h_mass()); //rate of phonon emission
+		 else pb2[1][i]=0;
 
-	     if (Egap>0)
-	     { x2=my_pow(Egap,constants->Get_h_gamma());
-	       x1=constants->Get_h_Cii();
-	       pb2[2][i]=x1*x2;         //rate of impact ionization
-	     }
-	     else pb2[2][i]=0; }
+		 if (Egap>0)
+		 { x2=my_pow(Egap,constants->Get_h_gamma());
+		   x1=constants->Get_h_Cii();
+		   pb2[2][i]=x1*x2;         //rate of impact ionization
+		 }
+		 else pb2[2][i]=0; }
 };
 
 //Get scattering rate of electrons total

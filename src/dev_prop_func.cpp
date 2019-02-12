@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,6 @@
 
 //Counts the Number of Bias in bias_input.txt
 int biascounter(){
-	int inputkey;
 	double voltage;
 	FILE *bias;
 	if ((bias=fopen("bias_input.txt","r"))==NULL)
@@ -75,25 +74,25 @@ int trialsread(){
 
 //Calculates Gain, Noise, Mean Time (using 0.1ps bin width)
 void postprocess(double Vsim[],double simtime, int voltages){
-	int numbins=simtime/0.1e-12;
+	int numbins=(int)(simtime/0.1e-12);
 	int i;
-	double G[voltages]={0};
-	double F[voltages]={0};
-	double T[voltages]={0};
+	double *G = new double[voltages];
+	double *F = new double[voltages];
+	double *T = new double[voltages];
 	FILE *results;
 	results=fopen("Result_2.txt","w");
 	fprintf(results,"Voltage Gain Noise MeanTime(ps)\n");
 	for(i=0; i<voltages; i++) {
-		double Hist[numbins]={0};
 		double V=Vsim[i];
 		FILE *Mout;
-		int inputkey;
 		char nameM[]= "gain_out.txt";
 		char voltagetb[8];
 		snprintf(voltagetb,sizeof(voltagetb),"%g",V);
-		char fileM[strlen(voltagetb)+strlen(nameM)+1];
-		snprintf(fileM,sizeof(fileM),"%s%s",voltagetb,nameM);
+		int fileM_len = strlen(voltagetb) + strlen(nameM) + 1;
+		char *fileM = new char[fileM_len];
+		snprintf(fileM,fileM_len,"%s%s",voltagetb,nameM);
 		Mout=fopen(fileM,"r");
+		delete[] fileM;
 		int event, count, count2;
 		double scanned, TGain, Gain2,mgain2;
 		TGain=0;
@@ -109,11 +108,11 @@ void postprocess(double Vsim[],double simtime, int voltages){
 		mgain2=Gain2/count;
 		F[i]=mgain2/(G[i]*G[i]);
 		fclose(Mout);
-
 		FILE *Tout;
 		char nameT[]= "time_to_breakdown.txt";
-		char fileT[strlen(voltagetb)+strlen(nameT)+1];
-		snprintf(fileT,sizeof(fileT),"%s%s",voltagetb,nameT);
+		int fileT_len = strlen(voltagetb) + strlen(nameT) + 1;
+		char *fileT =new char[fileT_len];
+		snprintf(fileT,fileT_len,"%s%s",voltagetb,nameT);
 		if((Tout=fopen(fileT,"r"))!=NULL) {
 			count=0;
 			int dump;
@@ -122,7 +121,8 @@ void postprocess(double Vsim[],double simtime, int voltages){
 				count++;
 			}
 			if(count>0) {
-				double data[count]={0};
+				double *data = new double[count];
+				data = { 0 };
 				rewind(Tout);
 				count=0;
 				while(fscanf(Tout,"%d %lf\n",&dump,&dump2)>0) {
@@ -130,10 +130,13 @@ void postprocess(double Vsim[],double simtime, int voltages){
 					count++;
 				}
 				fclose(Tout);
+				delete[] data;
 				char nameH[]="Hist.txt";
-				char fileH[strlen(voltagetb)+strlen(nameH)+1];
-				snprintf(fileH,sizeof(fileH),"%s%s",voltagetb,nameH);
+				int fileH_len = strlen(voltagetb) + strlen(nameH) + 1;
+				char *fileH = new char[fileH_len];
+				snprintf(fileH, fileH_len,"%s%s",voltagetb,nameH);
 				histogram hist(data,count,0.1,fileH);
+				delete[] fileH;
 				T[i]=hist.Get_Mean();
 				fprintf(results,"%lf %lf %lf %lf\n",Vsim[i],G[i],F[i],T[i]);
 			}
@@ -143,6 +146,8 @@ void postprocess(double Vsim[],double simtime, int voltages){
 			}
 		}
 		else fprintf(results,"%lf %lf %lf --\n",Vsim[i],G[i],F[i]);
+		delete[] fileT;
 	}
 	fclose(results);
+	delete[] G,F,T;
 };

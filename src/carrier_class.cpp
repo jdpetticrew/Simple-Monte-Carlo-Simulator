@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,14 +33,14 @@ carrier::carrier(SMC *input) : constants(input){
 	hbar=constants->Get_hbar();
 	for(i=1; i<(Array+1); i++)
 	{    position[i]=0;
-	     Egy[i]=0;
-	     kxy[i]=0;
-	     kz[i]=0;
-	     scattering[i]=0;
-	     dt[i]=0;
-	     dx[i]=0;
-	     time[i]=0;
-	     timearray[i]=0;}
+		 Egy[i]=0;
+		 kxy[i]=0;
+		 kz[i]=0;
+		 scattering[i]=0;
+		 dt[i]=0;
+		 dx[i]=0;
+		 time[i]=0;
+		 timearray[i]=0;}
 };
 void carrier::Input_pos(int i, double input){
 	position[i]=input;
@@ -97,14 +97,14 @@ void carrier::reset(){
 	int i;
 	for(i=1; i<(Array+1); i++)
 	{    position[i]=0;
-	     Egy[i]=0;
-	     kxy[i]=0;
-	     kz[i]=0;
-	     scattering[i]=0;
-	     dt[i]=0;
-	     dx[i]=0;
-	     time[i]=0;
-	     timearray[i]=0;}
+		 Egy[i]=0;
+		 kxy[i]=0;
+		 kz[i]=0;
+		 scattering[i]=0;
+		 dt[i]=0;
+		 dx[i]=0;
+		 time[i]=0;
+		 timearray[i]=0;}
 };
 void carrier::Input_timearray(int i, int input){
 	timearray[i]=input;

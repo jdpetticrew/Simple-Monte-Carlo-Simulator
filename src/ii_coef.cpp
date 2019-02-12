@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,6 @@
    Jonathan Petticrew, University of Sheffield, 2017.
  */
 
-
 #include "model.h"
 #include "SMC.h"
 #include "functions.h"
@@ -55,7 +54,8 @@ void ii_coef(int material){
 	simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
 	sgenrand(4358);//seeds the random number generator constant used to alow for comparison using different parameters.
 	double Esim,Eloop,z_pos,kf,kxy,kz,cos_theta,Energy;
-	int tn, pair, scat_e;
+	int tn;
+	int scat_e=0;
 	FILE *about;
 	about=fopen("alpha_beta.txt","w");
 	fprintf(about,"Efield (kV/cm),  Alpha (1/m), Beta (1/m)\n");
@@ -69,12 +69,15 @@ void ii_coef(int material){
 		char hname[] = "hpdf.txt";
 		char Eprint[5];
 		snprintf(Eprint,sizeof(Eprint),"%g",Esim);
-		char efile[strlen(ename)+strlen(Eprint)+1];
-		char hfile[strlen(hname)+strlen(Eprint)+1];
-		snprintf(efile,sizeof(efile),"%s%s",Eprint,ename);
-		snprintf(hfile,sizeof(hfile),"%s%s",Eprint,hname);
+		int efile_len = strlen(ename) + strlen(Eprint) + 1;
+		char* efile = new char[efile_len];
+		int hfile_len = strlen(hname) + strlen(Eprint) + 1;
+		char* hfile = new char[hfile_len];
+		snprintf(efile,efile_len,"%s%s",Eprint,ename);
+		snprintf(hfile,hfile_len,"%s%s",Eprint,hname);
 		epdf=fopen(efile,"w");
 		hpdf=fopen(hfile,"w");
+		delete[] efile, hfile;
 		//Reset variables to 0.
 		Eloop=Esim*1e5; //change elecric field from kV/cm to V/m.
 		z_pos=0;
@@ -113,7 +116,7 @@ void ii_coef(int material){
 			//electron scattering process starts
 			double random2;
 			int Eint;
-			Eint=floor(Energy*1000.0/constants.Get_q()+0.5); //bins energy to compare against probability curves from tools class.
+			Eint=(int)floor(Energy*1000.0/constants.Get_q()+0.5); //bins energy to compare against probability curves from tools class.
 			if (Energy>constants.Get_Emax()) {
 				Eint= constants.Get_NUMPOINTS();
 				random2=simulation.Get_pb(2,constants.Get_NUMPOINTS());
@@ -123,17 +126,17 @@ void ii_coef(int material){
 
 			if(random2<=simulation.Get_pb(0,Eint)) //phonon absorption
 			{   Energy+=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random2<=simulation.Get_pb(1,Eint)) //phonon emission
 			{   Energy-=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random2<=simulation.Get_pb(2,Eint)) //impact ionization
 			{   Energy=(Energy-constants.Get_e_Eth())/3.0;
-			    tn++;
-			    scat_e=0;
-			    fprintf(epdf,"%d %e\n", tn, z_pos);
-			    alpha_distance+=z_pos;
-			    z_pos=0;}
+				tn++;
+				scat_e=0;
+				fprintf(epdf,"%d %e\n", tn, z_pos);
+				alpha_distance+=z_pos;
+				z_pos=0;}
 			else if(random2>simulation.Get_pb(2,Eint)) //selfscattering
 			{    scat_e=1;}
 			//electron scattering process ends
@@ -175,7 +178,7 @@ void ii_coef(int material){
 			// hole scattering process starts
 			double random22;
 			int Eint2;
-			Eint2=floor(Energy*1000.0/constants.Get_q()+0.5);
+			Eint2=(int)floor(Energy*1000.0/constants.Get_q()+0.5);
 			if (Energy>constants.Get_Emax()) {
 				Eint2= constants.Get_NUMPOINTS();
 				random22=simulation.Get_pb2(2,constants.Get_NUMPOINTS());
@@ -185,17 +188,17 @@ void ii_coef(int material){
 
 			if(random22<=simulation.Get_pb2(0,Eint2)) //phonon absorption
 			{   Energy+=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random22<=simulation.Get_pb2(1,Eint2)) //phonon emission
 			{   Energy-=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random22<=simulation.Get_pb2(2,Eint2)) //impact ionization
 			{   Energy=(Energy-constants.Get_h_Eth())/3.0;
-			    tn++;
-			    scat_e=0;
-			    fprintf(hpdf,"%d %e\n", tn, -z_pos);
-			    beta_distance-=z_pos;
-			    z_pos=0;}
+				tn++;
+				scat_e=0;
+				fprintf(hpdf,"%d %e\n", tn, -z_pos);
+				beta_distance-=z_pos;
+				z_pos=0;}
 			else if(random22>simulation.Get_pb2(2,Eint2)) //selfscattering
 			{    scat_e=1;}
 			//hole scattering process ends

@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -262,17 +262,17 @@ void device::profiler(double voltagein){
 	}
 	i_min=pn;
 	i_max=endpoint;
-	FILE *efield;
 
 };
 //depletionlookup finds the pn junction
 int device::depletionlookup(){
 	int i;
 	for(i=0; i<(NumLayers-1); i++) {
-		int x;
+		double x;
 		x=N[i]*N[i+1];
 		if(x<=0) {
 			return i;
 		}
 	}
+	return 0;
 };

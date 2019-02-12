@@ -5,7 +5,7 @@
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,6 @@
    Jonathan Petticrew, University of Sheffield, 2017.
  */
 
-
 #include "model.h"
 #include "SMC.h"
 #include "functions.h"
@@ -53,7 +52,8 @@ void drift_velocity(int material){
 	simulation.scattering_probability();//this function returns 0 if no output can be generated and the user wants to quit
 	sgenrand(4358);//seeds the random number generator constant used to alow for comparison using different parameters.
 	double Esim,Eloop,z_pos,kf,kxy,kz,cos_theta,Energy;
-	int tn, pair, scat_e;
+	int tn;
+	int scat_e=0;
 	FILE *epdf;
 	FILE *hpdf;
 	epdf=fopen("evelocity.txt","w");
@@ -97,7 +97,7 @@ void drift_velocity(int material){
 			// electron scattering process starts
 			double random2;
 			int Eint;
-			Eint=floor(Energy*1000.0/constants.Get_q()+0.5);
+			Eint=(int)floor(Energy*1000.0/constants.Get_q()+0.5);
 			if (Energy>constants.Get_Emax()) {
 				Eint= constants.Get_NUMPOINTS();
 				random2=simulation.Get_pb(2,constants.Get_NUMPOINTS());
@@ -107,16 +107,16 @@ void drift_velocity(int material){
 
 			if(random2<=simulation.Get_pb(0,Eint)) //phonon absorption
 			{   Energy+=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random2<=simulation.Get_pb(1,Eint)) //phonon emission
 			{   Energy-=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random2<=simulation.Get_pb(2,Eint)) //impact ionization
 			{   Energy=(Energy-constants.Get_e_Eth())/3.0;
-			    tn++;
-			    scat_e=0;
+				tn++;
+				scat_e=0;
 
-			    z_pos=0;}
+				z_pos=0;}
 			else if(random2>simulation.Get_pb(2,Eint)) //selfscattering
 			{    scat_e=1;}
 			//electron scattering process ends
@@ -159,7 +159,7 @@ void drift_velocity(int material){
 			vtotalh+= (velocity);
 			double random22;
 			int Eint2;
-			Eint2=floor(Energy*1000.0/constants.Get_q()+0.5);
+			Eint2=(int)floor(Energy*1000.0/constants.Get_q()+0.5);
 			if (Energy>constants.Get_Emax()) {
 				Eint2= constants.Get_NUMPOINTS();
 				random22=simulation.Get_pb2(2,constants.Get_NUMPOINTS());
@@ -169,16 +169,16 @@ void drift_velocity(int material){
 
 			if(random22<=simulation.Get_pb2(0,Eint2)) //phonon absorption
 			{   Energy+=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random22<=simulation.Get_pb2(1,Eint2)) //phonon emission
 			{   Energy-=constants.Get_hw();
-			    scat_e=0;}
+				scat_e=0;}
 			else if(random22<=simulation.Get_pb2(2,Eint2)) //impact ionization
 			{   Energy=(Energy-constants.Get_h_Eth())/3.0;
-			    tn++;
-			    scat_e=0;
+				tn++;
+				scat_e=0;
 
-			    z_pos=0;}
+				z_pos=0;}
 			else if(random22>simulation.Get_pb2(2,Eint2)) //selfscattering
 			{    scat_e=1;}
 			//electron scattering process ends
